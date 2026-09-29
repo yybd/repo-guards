@@ -1,0 +1,54 @@
+{
+  "_comment": "The registry: which repos exist in this tree, and which tracks each one loads. Copy to registry.json — deploy.py does that for you on a fresh clone — and then let `/grove:register-project` fill it in from inside each repo, rather than writing entries by hand.",
+
+  "_what_grove_reads": "Grove itself reads three things and nothing else: `projects` (where each repo is, and its tracks), `ignored` (repos deliberately left off, so the offer stops coming back), and `keys_root`. Everything else here is read by whoever put it there.",
+
+  "_extensions": "A marketplace layered on grove keeps its own facts in this same file, because a repo has one identity and splitting it across two registries is how two answers drift apart. `apps` below is exactly that: an app's store identifiers belong to the marketplace that ships apps, and grove treats those entries as repos like any other — it reads `repo` and `tracks`, and has no opinion about `platforms` or anything else in them. If you ship nothing, delete the `apps` section; nothing here needs it.",
+
+  "keys_root": "keys",
+  "_keys_root_note": "Where credentials live, relative to the tree's base — never inside a repo. A skill says $KEYS_ROOT and never names this folder, so renaming it is a one-line change here. KEYS_ROOT in the environment wins, for a vault outside the tree. Grove has no secrets of its own; this exists so that a skill which does can name one portably.",
+
+  "_roots_note": "Roots are RELATIVE to the tree's base. That is what lets the same file work on another machine: the registry says how the tree is SHAPED, the machine says where it sits. An absolute path is honoured too, for a repo that genuinely lives elsewhere.",
+
+  "_base_note": "Where the tree sits. Omit it and the base is the directory holding grove itself, which is right when you cloned grove beside your repos. Set it — an absolute path, or ~/something — when grove lives somewhere else, which is the normal case if you added it as a marketplace rather than cloning it into your work tree. GROVE_DEV_ROOT in the environment wins over both.",
+  "base": null,
+
+  "_tracks_note": "Track names are plugin names, from any marketplace you have installed. Grove writes only the tracks it ships itself and reports the rest — a name it does not recognise is another marketplace's business, not an error.",
+
+  "projects": {
+    "_example_data": {
+      "root": "<data-repo>",
+      "role": "the shared data several repos read",
+      "tracks": [],
+      "_note": "Every registry name becomes an anchor: this one is reachable as $EXAMPLE_DATA in any session on this machine."
+    },
+    "_example_site": {
+      "root": "web/<your-site>",
+      "role": "the website",
+      "site": true,
+      "_site_note": "Marks this repo as the website — it becomes $SITE. Optional: having no website is a normal case.",
+      "tracks": []
+    }
+  },
+
+  "apps": {
+    "_comment": "An EXTENSION section — see `_extensions` above. Grove reads `repo` and `tracks` from each entry, so an app repo is guarded and reported like any other place; the rest of the entry belongs to the marketplace that ships apps.",
+    "_example_app": {
+      "repo": "<where-the-app-lives>/<app>",
+      "hub_slug": "<app>",
+      "platforms": {
+        "ios": {
+          "bundle_id": "com.example.<app>"
+        },
+        "android": {
+          "package": "com.example.<app>"
+        }
+      },
+      "tracks": []
+    }
+  },
+
+  "ignored": {
+    "_comment": "Repos deliberately NOT registered. Listed only so the offer stops coming back — an unanswered offer that returns every session trains you to ignore it, which is how a prompt stops working. Removing an entry here makes the offer come back."
+  }
+}

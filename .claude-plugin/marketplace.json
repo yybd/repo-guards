@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "grove",
+  "description": "Cross-repo governance for coding agents. Guards that refuse a blind write or a sweeping commit into a repo the session is not standing in, attribution that knows what THIS session wrote everywhere, and one command that closes every place it left open.",
+  "license": "MIT",
+  "owner": {
+    "name": "Grove"
+  },
+  "plugins": [
+    {
+      "name": "grove",
+      "description": "The cross-repo layer, and the only track that is always on. It refuses a write to a path another repo declared as its own, refuses `commit -a` and `push` into a repo this session is not standing in — and when it allows a foreign write, hands back that repo's git status so the blind spot closes. At the end of a turn it names what was left open elsewhere. `close.py` then reports every place at once and commits only what this session actually wrote.",
+      "source": "./plugins/grove",
+      "category": "workflow",
+      "license": "MIT",
+      "author": {
+        "name": "Grove"
+      }
+    }
+  ]
+}

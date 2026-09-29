@@ -1,0 +1,45 @@
+# Every check that needs no installation, on every push — and on more than one machine.
+#
+# Why not `deploy.py`: deploy installs — it copies plugins into the machine's cache and
+# writes settings. A runner has neither, so deploy would report problems that are not
+# problems. `tools/ci.py` is the half that is true of a bare checkout, and running it
+# here is the only thing that exercises the fresh-clone path on every change.
+#
+# Why a matrix: this is installed by cloning, and the machine it lands on is not this
+# one. macOS is where it is developed and still ships Python 3.9 as /usr/bin/python3 —
+# the interpreter a user gets by typing `python3` without thinking about it — while
+# Linux is where most CI and most containers live. The floor is 3.9 for that reason, and
+# it is a floor that has to be tested rather than declared: the standard library is the
+# only dependency, so there is nothing to install and no excuse for not checking.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.9", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} · python ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      # The pipelines build throwaway git repos and commit in them, and a runner has no
+      # global identity. Each fixture sets its own, and this is the belt for the ones
+      # that only ever ran where a person was already configured.
+      - name: git identity for the throwaway repos
+        run: |
+          git config --global user.email "check@example.invalid"
+          git config --global user.name "check"
+          git config --global init.defaultBranch main
+      # Everything here is standard library; there is nothing to install.
+      - run: python3 tools/ci.py --metrics

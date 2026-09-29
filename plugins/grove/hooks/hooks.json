@@ -1,0 +1,83 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/honor_ownership.py",
+            "timeout": 10,
+            "statusMessage": "checking declared ownership"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/scope_foreign_commits.py",
+            "timeout": 10,
+            "statusMessage": "checking commit scope"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Glob|Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/record_touched_repos.py",
+            "timeout": 10,
+            "statusMessage": "noting which repos this touches"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/warn_uncommitted_roots.py",
+            "timeout": 15,
+            "statusMessage": "checking uncommitted work"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/warn_stale_plugin_cache.py",
+            "timeout": 15,
+            "statusMessage": "checking plugin copies"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/warn_ownership_drift.py",
+            "timeout": 10,
+            "statusMessage": "checking declared ownership here"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/offer_registration.py",
+            "timeout": 10,
+            "statusMessage": "checking the registry"
+          }
+        ]
+      }
+    ]
+  }
+}

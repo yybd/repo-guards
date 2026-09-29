@@ -1,0 +1,10 @@
+# Python bytecode from the skills' helper scripts — regenerated on every run
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# the registry is MACHINE data: which repos exist in THIS tree. The shipped file is
+# tools/registry.example.json, and deploy.py copies it here on a fresh clone.
+tools/registry.json
