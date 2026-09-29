@@ -8,6 +8,11 @@ The moment the agent "reaches out" to a foreign directory, it loses touch with r
 
 **Grove was built to solve exactly this.** It is a set of guardrails that run inside the session, at the moment of the tool call: they detect the anomaly, refuse the two actions that cannot be undone, and hand the agent back the picture it was missing so it can correct itself.
 
+> **Built for Claude Code, and tested only there.** The guards are Claude Code hooks:
+> they read its hook protocol and its tool names (`Bash`, `Edit`, `Write`), and
+> `close.py` reads the journal those hooks write. The idea carries to any agent with a
+> pre-tool hook; the code does not, yet.
+
 ---
 
 ## The Components: What does Grove do?
