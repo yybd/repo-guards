@@ -2,6 +2,14 @@
 
 # Working rules — every project
 
+## Language
+
+**Answer the user in Hebrew — always.** Every reply, summary, question and
+report is written in Hebrew, whatever language the request, the tool output or
+the earlier turns were in. Code, identifiers, commit messages, file and command
+names stay as they are (commit messages in English, per the rules below).
+Documents follow the language of the project they land in.
+
 ## Commits
 
 **Commit in the repo the change belongs to, before the turn ends.** A change left
