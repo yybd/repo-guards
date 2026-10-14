@@ -8,7 +8,7 @@ description: >-
   missing in a repo that plainly needs it, or when a repo should be excluded so the
   offer stops coming back. It reads the repo to decide what it is, proposes the
   tracks that follow, writes the registry entry and the repo's own settings, and
-  commits each in its own repo. Run it from the repo being registered.
+  commits the settings in that repo. Run it from the repo being registered.
 ---
 
 # Register a project with RepoGuards
@@ -193,18 +193,15 @@ The script owns only the `repo-guards@repo-guards` keys inside `enabledPlugins` 
 leaves everything else in those files alone. Run `--check` first and read it: it
 is also how you diagnose a registered repo whose tracks are not loading.
 
-## 6. Commit — two repos, two commits
+## 6. Commit — the repo, not the registry
 
-This change lands in two repos, so it is two commits, never one:
+`tools/registry.json` is **machine data** and is gitignored: which repos exist on this
+machine is nobody else's business, and there is nothing to commit for it. What lands
+in a repo is the settings file, and only when the repo draws at least one track:
 
-1. **RepoGuards** — the registry entry. Message in RepoGuards' terms: a project
-   was registered and which tracks it draws.
-2. **the repo itself** — its `.claude/settings.json`. Message in that repo's terms:
-   it declares which tracks it loads.
-
-Content before the thing that points at it: commit the registry first. A
-half-applied pair is always found through the broken reference, not the missing
-content.
+- **the repo itself** — its `.claude/settings.json`. Message in that repo's terms:
+  it declares which tracks it loads. A repo registered with `tracks: []` gets no
+  file and no commit.
 
 Do not push. Pushing is asked for, never assumed.
 

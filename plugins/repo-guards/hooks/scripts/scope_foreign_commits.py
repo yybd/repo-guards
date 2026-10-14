@@ -21,9 +21,14 @@ Sibling to honor_ownership.py, deliberately separate: that one matches
 Write|Edit and never sees a commit, since commits travel through Bash. Kept apart
 so a change here cannot break the file guard.
 
-Scope differs from its sibling on purpose: this applies to EVERY registry root,
-including `protected: never`. That flag means "you may write here from anywhere",
-which says nothing about being free to sweep whatever is dirty here into a commit.
+**Foreign means any other git repository, registered or not.** Until 0.3.0 this read
+only registry roots, so a repo nobody had registered was exempt — while the README said
+the guards run in every repo whether or not it is registered. A stranger-install test
+pushed into an unregistered repo and nothing answered. Now "foreign" is decided by git:
+the target's working tree (`rev-parse --show-toplevel`) is not the one the session
+stands in. The registry only lends a repo its name. `protected: never` changes nothing
+here either: it means "you may write here from anywhere", which says nothing about being
+free to sweep whatever is dirty here into a commit.
 
 **And when it does not refuse, it shows.** A foreign git command that stages explicit
 paths is allowed — but the session still cannot see what else is dirty there, which is
@@ -112,6 +117,37 @@ def root_of(path, roots):
         if path == r or path.startswith(r + os.sep):
             return name, r
     return None
+
+
+_TOP = {}
+
+
+def toplevel(path):
+    """The git working tree holding `path`, or None — git decides, not the registry."""
+    if path not in _TOP:
+        top = None
+        try:
+            d = path if os.path.isdir(path) else os.path.dirname(path)
+            r = subprocess.run(["git", "-C", d, "rev-parse", "--show-toplevel"],
+                               capture_output=True, text=True, timeout=3)
+            if r.returncode == 0 and r.stdout.strip():
+                top = real(r.stdout.strip())
+        except Exception:
+            top = None
+        _TOP[path] = top
+    return _TOP[path]
+
+
+def foreign_root(target, roots):
+    """(name, root) of the repo `target` is in — named from the registry when it is
+    there, from its directory otherwise. None when git cannot place it."""
+    top = toplevel(target)
+    if not top:
+        return None
+    named = root_of(top, roots)
+    if named and named[1] == top:
+        return named
+    return os.path.basename(top), top
 
 
 def resolve(p, base):
@@ -264,11 +300,8 @@ def main():
     if not raw_cwd:
         return
     cwd = real(raw_cwd)
-    roots = registry_roots()
-    if not roots:
-        return
-
-    here = root_of(cwd, roots)                    # the root we are standing in, if any
+    roots = registry_roots()                      # names only; an empty registry is fine
+    here = toplevel(cwd)                          # the tree we stand in; None outside git
 
     seen = []                                     # foreign writes that were ALLOWED
     # Where each command runs — including inside a subshell, and including a `cd` whose
@@ -279,10 +312,10 @@ def main():
             continue
 
         target = git_target(tokens, here_dir, env)
-        there = root_of(target, roots)
+        there = foreign_root(target, roots)
         if not there:
-            continue                              # not a registry repo; not ours
-        if here and here[1] == there[1]:
+            continue                              # git cannot place it; allow
+        if here and here == there[1]:
             continue                              # we ARE standing in it; allowed
 
         hit = sweeping(tokens, target, there[1])
@@ -299,8 +332,7 @@ def main():
                 f"`git push` targets the '{name}' repo ({root}), which this session is "
                 f"not standing in — this session is in {cwd}.\n"
                 f"A push publishes a WHOLE BRANCH, not the commit you just made, and it "
-                f"cannot be undone. On 2026-09-07 this sent 20 commits in one app repo, 18 of "
-                f"them written before that session existed.\n"
+                f"cannot be undone — including commits that were there before this session.\n"
                 f"Look first, from here:\n"
                 f"  git -C {root} log @{{u}}..HEAD --oneline    # everything this would publish\n"
                 f"  python3 $REPO_GUARDS/tools/close.py                    # every place, and its push radius\n"
@@ -312,8 +344,7 @@ def main():
                 f"`git {sub} {flag}` targets the '{name}' repo ({root}), which this "
                 f"session is not standing in — this session is in {cwd}.\n"
                 f"Whatever is already dirty there is invisible from here, so this "
-                f"stages work you never saw into your commit. On 2026-09-08 app-hub "
-                f"held 17 uncommitted files of the owner's own.\n"
+                f"stages work you never saw into your commit.\n"
                 f"Stage exactly what you wrote instead:\n"
                 f"  git -C {root} add <the paths you wrote>\n"
                 f"  git -C {root} status --short      # nothing else staged?\n"

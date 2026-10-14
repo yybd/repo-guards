@@ -140,6 +140,14 @@ def sync_anchors(reg, check):
     want = anchors(reg)
     data, _ = read_settings(USER_SETTINGS)
     env = dict(data.get("env") or {})
+    # $GROVE is the old name, kept for a machine that had Grove — a stranger who never
+    # did gets no variable named after a product they have not heard of.
+    if "GROVE" not in env:
+        want.pop("GROVE", None)
+    # A keys folder that does not exist is a variable pointing at nothing; it is
+    # written once the folder is there (an explicit $KEYS_ROOT is always kept).
+    if want.get("KEYS_ROOT") and not os.path.isdir(want["KEYS_ROOT"]) and "KEYS_ROOT" not in env:
+        want.pop("KEYS_ROOT")
     before = {k: env.get(k) for k in want}
     if all(env.get(k) == v for k, v in want.items()):
         return None
@@ -195,7 +203,6 @@ def main():
         new = [k for k, v in want.items() if before.get(k) != v]
         rows.append(("✗" if a.check else "→", "anchors",
                      f"{len(new)} variables in {pretty(USER_SETTINGS)} ($" + ", $".join(sorted(new)[:4]) + "…)"))
-        drift += 1
 
     print(f"registry: {pretty(REGISTRY)}")
     print(f"tracks on disk ({len(shipped)}): {', '.join(sorted(shipped))}\n")
@@ -212,16 +219,24 @@ def main():
             print(f"  · {name}: not shipped here — {', '.join(bad)}")
         print("    (another marketplace's track, or a typo. Nothing was written for them.)")
 
+    # Repos and anchors are counted apart: an anchor lives in this machine's settings,
+    # not in any repo, and calling it "1 repos updated" sent a stranger looking for a
+    # repo to commit in when none had changed.
     print()
-    if not drift:
+    if not drift and not moved:
         print("Everything is in sync. Nothing was changed.")
         return 0
     if a.check:
-        print(f"{drift} repos differ from the registry. To sync:\n"
+        parts = ([f"{drift} repos differ from the registry"] if drift else []) + \
+                (["the anchor variables differ"] if moved else [])
+        print(" and ".join(parts) + ". To sync:\n"
               f"  python3 {pretty(os.path.join(HERE, 'sync_project_settings.py'))}")
         return 1
-    print(f"{drift} repos updated. The tracks load there from the next session.\n"
-          "Each such change is a commit in its own repo — the file belongs to it, not to RepoGuards.")
+    if moved:
+        print(f"Anchor variables written to {pretty(USER_SETTINGS)} — this machine's, in no repo.")
+    if drift:
+        print(f"{drift} repos updated. The tracks load there from the next session.\n"
+              "Each such change is a commit in its own repo — the file belongs to it, not to RepoGuards.")
     return 0
 
 

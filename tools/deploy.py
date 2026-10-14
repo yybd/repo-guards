@@ -219,6 +219,8 @@ def main():
                 if rc != 0:
                     print(f"     ✗ {out.splitlines()[-1][:120] if out else 'failed'}")
                     problems += 1
+                else:
+                    print("     ✓ done")      # the line above it reads like a fault; it was one, and is fixed
 
     for _, line in notes:
         for i, ln in enumerate(line.splitlines()):
@@ -288,6 +290,21 @@ def main():
     print("   " + (out.splitlines()[-1] if out.splitlines() else ""))
     if rc != 0:
         problems += 1
+
+    # What the next session will load. "Open a new session" is advice nobody can check
+    # from a shell — this is the list it will run, read from the plugin's own hooks.json.
+    try:
+        with open(os.path.join(REPO, "plugins", "repo-guards", "hooks", "hooks.json"),
+                  encoding="utf-8") as f:
+            hooks = json.load(f).get("hooks", {})
+        print("\n── hooks the next session loads ──")
+        for event, groups in hooks.items():
+            names = [os.path.basename(h.get("command", "")).split()[0]
+                     for g in groups for h in g.get("hooks", [])]
+            names = [n.rsplit(".", 1)[0] for n in names if n]
+            print(f"   {event:<17} {', '.join(names)}")
+    except Exception:
+        pass
 
     print()
     if problems:

@@ -26,7 +26,7 @@ The system provides 3 critical solutions:
 
 ### 1. Active Guardrails (The Guard Hooks)
 * **Blocking Blind Commits (`scope_foreign_commits`):** If the AI stands in directory A and attempts to run `git commit -a` in directory B, the system blocks it. Instead of a generic failure, it injects the true state of the foreign directory (including the branch name and open files), instructing the AI to commit only specific files.
-* **Honoring Boundaries (`honor_ownership`):** If a file is claimed by another project (via `.claude/owns.json`), the hook refuses to let the AI edit it, redirecting the agent to the proper location.
+* **Honoring Boundaries (`honor_ownership`):** If a file is claimed by another project (via `.claude/owns.json`), the hook refuses to let the AI edit it, redirecting the agent to the proper location. The file's format, with an example, is in [tools/README.md](tools/README.md#and-ownership-is-declared-never-guessed).
 
 ### 2. Smart Contextual Committing (`close.py`)
 An agent updating 3 projects simultaneously leaves a trail of changes. Standard Git commands break down here.
@@ -41,6 +41,8 @@ The brain that tracks which projects exist on your machine, and which "Skill Tra
 
 Because RepoGuards manages your environment, it is usually **the first product you install**, sitting alongside your other projects (typically under a `<base>` directory like `~/Developer`).
 
+**You need:** git, Python 3.9 or later, and Claude Code (`claude` on your PATH). Nothing else is installed — the tools use only Python's standard library.
+
 ```bash
 cd <base>
 git clone https://github.com/yybd/repo-guards.git
@@ -51,6 +53,18 @@ python3 repo-guards/tools/deploy.py
 **Give `marketplace add` an absolute path** — that is what `"$PWD/…"` is for. A bare `repo-guards` or `dev/repo-guards` is read as a GitHub `owner/repo`, fails with an "access rights" error, and every step after it fails with it.
 
 `deploy.py` is the whole installation: it creates your `tools/registry.json` from the shipped template, installs the plugin, and verifies. It prints what it did — read that rather than assuming. **Then open a new session**, because hooks and skills are read at session start.
+
+### Try it in 60 seconds
+
+No session needed. Make two throwaway repos and hand the guard the exact payload Claude Code would send when an agent standing in one pushes the other:
+
+```bash
+mkdir -p /tmp/rg-demo && cd /tmp/rg-demo && git init -q mine && git init -q theirs
+echo '{"tool_name":"Bash","tool_input":{"command":"git -C ../theirs push"},"cwd":"/tmp/rg-demo/mine"}' \
+  | python3 <base>/repo-guards/plugins/repo-guards/hooks/scripts/scope_foreign_commits.py
+```
+
+It answers `"permissionDecision": "deny"` with the reason the agent would read. Change the command to `git -C ../theirs add a.txt` and it allows, with the other repo's state attached; to `git push` with `"cwd"` set to `theirs`, and it says nothing — that one is yours to make.
 
 **Optional, and reported by every deploy until you do it or decide not to** — the working rules, loaded in every session in every repo:
 
@@ -71,9 +85,17 @@ For the guardrails and skills to activate in a specific project (e.g., your fron
 ```bash
 /repo-guards:register-project
 ```
-This command reads the project, writes its entry in RepoGuards' `registry.json`, and generates a local `.claude/settings.json` in the project itself.
+This command reads the project, writes its entry in RepoGuards' `registry.json`, and — when the repo draws at least one skill track — writes the project's own `.claude/settings.json`. RepoGuards ships no tracks of its own beyond itself, so until you add a marketplace that does (such as App Factory), registration creates no file in the project.
 
-**What registration does and does not change.** The guards are always on — they ship with the plugin, which is enabled for your user, so they run in every repo whether or not it is registered. Registration decides two other things: **which skill tracks load there**, and whether the end-of-turn guard **reports work you left uncommitted** in it. So an unregistered repo is not protected-by-being-ignored; it is a repo that quietly loads no tracks.
+**Without the slash command**, an entry in `tools/registry.json` is three lines — a path relative to `<base>`, a role, and the tracks — followed by `python3 tools/deploy.py`:
+
+```json
+"projects": {
+  "my-app": {"root": "my-app", "role": "the iOS app", "tracks": []}
+}
+```
+
+**What registration does and does not change.** The guards are always on — they ship with the plugin, which is enabled for your user, so they run in every repo whether or not it is registered. Registration decides two other things: **which skill tracks load there**, and whether the end-of-turn guard **reports work you left uncommitted** in it. So an unregistered repo is not protected-by-being-ignored; it is a repo that quietly loads no tracks. (Since 0.3.0 that is true of the commit-and-push guard too: any git repository other than the one the session stands in is foreign, registered or not. Before, only registered repos counted.)
 
 That is why an unregistered repo says so, once per session. **It asks three times and then stops interrupting** — after that it is a single line, still said every session, because the thing it reports does not go away on its own. Two answers end it: register the repo, or list it under `ignored`. On a machine full of repos that are nobody's business, `REPO_GUARDS_OFFER=off` in the environment, or `"offer_registration": false` in the registry, ends it everywhere.
 

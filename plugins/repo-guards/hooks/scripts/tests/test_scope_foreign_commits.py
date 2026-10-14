@@ -218,6 +218,33 @@ for needle, label in [(HUB, "the picture names the target repo"),
     fails += 0 if ok else 1
     print(f"{'✓' if ok else '✗':2}{'yes' if ok else 'no':<8}{'yes':<8}  {label}")
 
+# --- a repo nobody registered is still foreign ---
+# Until 0.3.0 only registry roots counted, so a stranger's two fresh repos were exempt —
+# while the README said the guards run in every repo, registered or not. Git decides now.
+print("\n-- unregistered repos --")
+_u = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-unreg-"))
+atexit.register(shutil.rmtree, _u, True)
+for _n in ("mine", "theirs"):
+    subprocess.run(["git", "init", "-q", os.path.join(_u, _n)], capture_output=True)
+os.makedirs(os.path.join(_u, "mine", "src"))
+os.makedirs(os.path.join(_u, "plain"))
+MINE, THEIRS = os.path.join(_u, "mine"), os.path.join(_u, "theirs")
+UNREG = [
+    ("deny",    "push into an unregistered sibling",           "git -C ../theirs push",        MINE),
+    ("deny",    "commit -am into an unregistered sibling",     "git -C ../theirs commit -am x", MINE),
+    ("deny",    "add . after cd into it",                      "cd ../theirs && git add .",     MINE),
+    ("context", "an explicit add there gets the picture",      "git -C ../theirs add a.txt",   MINE),
+    ("allow",   "push from a subdirectory of our own repo",    "git push",                     os.path.join(MINE, "src")),
+    ("allow",   "commit -am in our own repo",                  "git commit -am x",             MINE),
+    ("allow",   "a target that is not a git repo at all",      "git -C ../plain add .",        MINE),
+    ("deny",    "standing outside any repo, pushing into one", f"git -C {THEIRS} push",        _u),
+]
+for exp, label, cmd, cwd in UNREG:
+    got, _ = run(cmd, cwd)
+    ok = got == exp
+    fails += 0 if ok else 1
+    print(f"{'✓' if ok else '✗':2}{got:<8}{exp:<8}  {label}")
+
 # fail-open cases: malformed input must never crash and never deny
 print("\n-- fails open --")
 for label, raw in [("empty stdin", ""), ("malformed JSON", "{{{"),

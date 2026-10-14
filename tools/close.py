@@ -383,7 +383,9 @@ def main():
 
     print()
     if open_git and not a.commit:
-        print("to close:  python3 tools/close.py --commit -m \"...\"")
+        # the full path: the relative one was wrong for anyone not standing in this repo
+        me = os.path.abspath(__file__).replace(os.path.expanduser("~"), "~", 1)
+        print(f"to close:  python3 {me} --commit -m \"...\"")
     if unpushed:
         print("\nto push — and what each one would publish:")
         for root, st in unpushed:

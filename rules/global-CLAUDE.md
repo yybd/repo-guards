@@ -22,13 +22,12 @@ through the broken reference, never through the missing content.
 
 **Before every `push` — read `git log @{u}..HEAD`.** If it contains commits that were
 not created in this session, say so and get approval before pushing. A `push` publishes
-a **whole branch**, not your last commit: on 2026-09-07 this sent 20 commits in an app
-repo, 18 of them older than the session, and 5 in the hub, most of them the owner's own
-work.
+a **whole branch**, not your last commit — every commit waiting on it goes out, including
+ones another session or another person made, and none of it can be taken back.
 
 **`push` is not `deploy`.** Never report "the site is updated" on the strength of a
-push. In at least one project this is explicit — that repo's own memory says
-`push deploys nothing`.
+push. Whether a push deploys anything is a fact about that project — check it there,
+and say "pushed", not "live", until you have.
 
 ## Working across projects
 
