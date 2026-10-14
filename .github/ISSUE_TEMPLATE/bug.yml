@@ -1,0 +1,42 @@
+name: Bug
+description: A guard blocked what it should allow, allowed what it should block, crashed, or the install broke.
+labels: [bug]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong
+      options:
+        - A guard blocked something it should have allowed
+        - A guard allowed something it should have blocked
+        - A guard crashed or printed an error
+        - deploy.py / close.py / the install
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: The tool call and the guard's message
+      description: The command or edit the agent made, where the session was standing, and what grove printed. Paste it whole.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: Output of `python3 tools/deploy.py --check`
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: OS, Python version, Claude Code version
+      placeholder: macOS 15, Python 3.9.6, Claude Code 2.x
+    validations:
+      required: true

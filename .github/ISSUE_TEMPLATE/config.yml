@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or idea
+    url: https://github.com/yybd/cross-repo-guards/discussions
+    about: How to set something up, whether grove fits a workflow, or an idea that is not a bug yet.
