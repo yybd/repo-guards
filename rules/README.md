@@ -12,6 +12,17 @@ ln -s $GROVE/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
 
 That one command is the whole install, and it is per machine.
 
+**Rules of your own go beside these, not into them.** This file is shared — whoever links it gets every line in it — so a preference that is yours alone (the language you are answered in, a house style) does not belong here. Make `~/.claude/CLAUDE.md` a file of your own instead, and import these from it:
+
+```
+@$GROVE/rules/global-CLAUDE.md   ← written as the expanded path; @ does not expand variables
+
+## Mine
+…
+```
+
+The staleness check accepts either shape: the symlink, or a file that imports this one.
+
 ## Why a symlink and not the plugin
 
 A plugin cannot ship this. Plugins carry skills, agents, commands, MCP servers and

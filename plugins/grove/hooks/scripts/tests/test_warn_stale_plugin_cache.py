@@ -176,6 +176,15 @@ def main():
         msg, _ = run(env, sid="s9", cwd=repo)
         check("does not resolve" in msg, "a symlink pointing elsewhere → reported", msg[:140])
         os.unlink(link)
+
+        # a file of one's own that imports the rules is the other correct shape
+        write(link, "@" + os.path.join(repo, "rules", "global-CLAUDE.md") + "\n\nmine\n")
+        msg, _ = run(env, sid="s9a", cwd=repo)
+        check(msg == "", "an own CLAUDE.md importing the rules → silent", msg[:120])
+        write(link, "mine, and no import\n")
+        msg, _ = run(env, sid="s9b", cwd=repo)
+        check("does not resolve" in msg, "an own CLAUDE.md without the import → reported", msg[:140])
+        os.unlink(link)
         os.symlink(os.path.join(repo, "rules", "global-CLAUDE.md"), link)
 
         # a broken link must not be reported as a plugin problem

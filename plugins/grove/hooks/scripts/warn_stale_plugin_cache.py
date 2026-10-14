@@ -67,6 +67,27 @@ def real(p):
     return os.path.realpath(os.path.expanduser(p))
 
 
+def imports(path, want):
+    """A user CLAUDE.md of one's own that pulls the rules in with an `@path` line.
+
+    That is the other way to load them, and the right one for anyone with personal
+    rules of their own: the rules stay shared, the additions stay private. Claude Code
+    resolves a relative import against the importing file's directory.
+    """
+    try:
+        lines = open(path, encoding="utf-8").read().splitlines()
+    except Exception:
+        return False
+    base = os.path.dirname(os.path.realpath(path))
+    for ln in lines:
+        ln = ln.strip()
+        if ln.startswith("@") and len(ln) > 1:
+            target = os.path.expanduser(ln[1:].split()[0])
+            if real(os.path.join(base, target)) == want:
+                return True
+    return False
+
+
 def tree(root):
     """{relpath: sha256} for a plugin directory, or None if it is not readable.
 
@@ -225,7 +246,7 @@ def findings():
             out.append(("rules:absent",
                         f"· rules/global-CLAUDE.md reaches no session — {USER_CLAUDE_MD} "
                         f"does not exist.\n    ln -s {want} {USER_CLAUDE_MD}"))
-        elif real(USER_CLAUDE_MD) != want:
+        elif real(USER_CLAUDE_MD) != want and not imports(USER_CLAUDE_MD, want):
             out.append(("rules:elsewhere",
                         f"· {USER_CLAUDE_MD} does not resolve to this repo's "
                         f"rules/global-CLAUDE.md.\n    readlink {USER_CLAUDE_MD}"))

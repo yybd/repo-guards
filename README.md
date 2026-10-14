@@ -50,7 +50,13 @@ python3 <base>/cross-repo-guards/tools/deploy.py
 ln -s "<base>/cross-repo-guards/rules/global-CLAUDE.md" ~/.claude/CLAUDE.md
 ```
 
-If you already have a `~/.claude/CLAUDE.md`, that link would replace it. Move yours aside first, or skip this step: nothing else depends on it.
+If you already have a `~/.claude/CLAUDE.md` — or want rules of your own on top of these, such as the language you are answered in — do not replace it. Keep it, and add one line to it that imports the rules instead:
+
+```
+@<base>/cross-repo-guards/rules/global-CLAUDE.md
+```
+
+The shared rules stay shared, your additions stay yours, and deploy accepts either shape. Nothing else depends on this step.
 
 ### Connecting a New Project
 For the guardrails and skills to activate in a specific project (e.g., your frontend repo), enter the project and run:
