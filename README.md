@@ -6,6 +6,8 @@
 
 **The safety and orchestration layer for AI agents in multi-repo environments.**
 
+![The agent stands in my-app and reaches into app-hub: RepoGuards refuses the push and the sweeping add, shows the three commits the push would have published, and allows an exact-path add with the other repo's state attached. Real hook output on two throwaway repos.](docs/media/repoguards-demo.gif)
+
 An AI agent (like Claude Code) is a brilliant tool when operating within a single project folder (Repository). However, in the real world, tasks cross boundaries: shipping a feature requires a code change (App), a data schema update (Hub), and editing a marketing page (Web).
 The moment the agent "reaches out" to a foreign directory, it loses touch with reality. Because the `git status` command is limited to its current working directory, the agent might blindly overwrite another developer's open files, push code to the wrong branch, or perform a destructive blind commit.
 
