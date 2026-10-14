@@ -53,6 +53,12 @@ variables**, written into
 `python3 $REPO_GUARDS/tools/deploy.py`. On a command line they expand by themselves; to
 see them all: `env | grep -E "DEV_ROOT|REPO_GUARDS|KEYS_|SITE"`.
 
+Two of them are not repo names. **`$SITE`** is your website repo — the registry entry
+marked `"site": true`, or one named `site` — and is absent when you have none.
+**`$KEYS_ROOT`** is the folder that holds signing keys and API credentials, outside every
+repo — the registry's `keys_root`, or `keys` beside your repos — and is written only once
+that folder exists. A skill that names either says what it does when it is not set.
+
 **The registry says how the tree is shaped, the machine says where it sits.** A root is
 written relative (`<data-repo>`, `web/<site>`), and the base is derived from where RepoGuards
 itself sits. The same registry therefore works on a second machine without

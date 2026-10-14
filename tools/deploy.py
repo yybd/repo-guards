@@ -171,6 +171,18 @@ def main():
     rows = [ln for ln in out.splitlines() if ln.strip()]
     shown = [ln for ln in rows if not ln.lstrip().startswith("=")] or rows[-1:]
     print("\n".join("   " + ln for ln in shown))
+    # Which places the registry knows, by name. A stranger who registered one project by
+    # hand had no line saying it was read — only rows for settings that changed.
+    try:
+        with open(reg_path, encoding="utf-8") as f:
+            reg = json.load(f)
+        names = sorted(n for sect in ("projects", "apps")
+                       for n in (reg.get(sect) or {}) if not n.startswith("_"))
+        listed = ", ".join(names[:12]) + (f" +{len(names) - 12} more" if len(names) > 12 else "")
+        print(f"   registered: {len(names)}" + (f" — {listed}" if names else
+              " — none yet; /repo-guards:register-project adds one"))
+    except Exception:
+        pass                                       # sync above already said what is wrong
     # Any non-zero is a problem, in BOTH modes. The old condition added zero whenever
     # --check was on, so `deploy.py --check` printed sync's ✗ and then answered
     # "✓ everything is in place" with exit 0 — reproduced 2026-09-09 with a registry

@@ -210,10 +210,10 @@ def main():
     # effect, and it is what the registry records.
     knowns = known_roots(reg)
 
-    # Registered AT this path, or the registered root is BELOW us. The second is how
-    # A measured case: a root registered at `<repo>/web` while the git top-level is
-    # ~/Developer/AI/skills — and offering to register the tree above it would be asking
-    # about something the registry has already answered.
+    # Registered AT this path, or the registered root is BELOW us. A measured case of
+    # the second: a root registered at `<repo>/web` while the git top-level is `<repo>`
+    # — and offering to register the tree above it would be asking about something the
+    # registry has already answered.
     for _, kroot, _ in knowns:
         if cwd == kroot or kroot.startswith(cwd + os.sep):
             return

@@ -55,8 +55,8 @@ def roots():
 
     Whether a root is a git repo is no longer asked here. It used to test for a `.git`
     DIRECTORY, which is false for a worktree or a submodule (there `.git` is a file),
-    and false for a root registered as a subdirectory of its repo — ~/Developer/AI/skills/web
-    is registered while the repo top-level is ~/Developer/AI/skills, so it was skipped
+    and false for a root registered as a subdirectory of its repo — `<repo>/web`
+    is registered while the repo top-level is `<repo>`, so it was skipped
     despite the registry saying the Stop guard is the reason it is listed. git answers
     that question correctly in dirty(), in a call this already makes.
     """

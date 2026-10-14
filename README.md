@@ -44,15 +44,30 @@ Because RepoGuards manages your environment, it is usually **the first product y
 **You need:** git, Python 3.9 or later, and Claude Code (`claude` on your PATH). Nothing else is installed — the tools use only Python's standard library.
 
 ```bash
-cd <base>
+BASE=~/Developer                     # wherever your repos live
+cd "$BASE"
 git clone https://github.com/yybd/repo-guards.git
-claude plugin marketplace add "$PWD/repo-guards"
-python3 repo-guards/tools/deploy.py
+claude plugin marketplace add "$BASE/repo-guards"
+python3 "$BASE/repo-guards/tools/deploy.py"
 ```
 
-**Give `marketplace add` an absolute path** — that is what `"$PWD/…"` is for. A bare `repo-guards` or `dev/repo-guards` is read as a GitHub `owner/repo`, fails with an "access rights" error, and every step after it fails with it.
+Every command below uses `$BASE` the same way, so set it once in the shell you paste
+into.
+
+**Give `marketplace add` an absolute path** — that is what `"$BASE/…"` is for. A bare `repo-guards` or `dev/repo-guards` is read as a GitHub `owner/repo`, fails with an "access rights" error, and every step after it fails with it.
 
 `deploy.py` is the whole installation: it creates your `tools/registry.json` from the shipped template, installs the plugin, and verifies. It prints what it did — read that rather than assuming. **Then open a new session**, because hooks and skills are read at session start.
+
+**What it writes outside this repo:** one `env` variable per place in
+`~/.claude/settings.json` — `$REPO_GUARDS`, `$DEV_ROOT`, and every registered project by
+its own name — so a skill can say `$SITE/content` instead of a path on your machine.
+Nothing else in that file is touched. The `enabledPlugins` and `extraKnownMarketplaces`
+entries you will also find there are Claude Code's own, written by the `claude plugin`
+commands above.
+
+`claude plugin list` shows RepoGuards with a commit hash where other plugins show a
+version. That is deliberate: `plugin.json` declares no version, so `update` follows the
+commit; releases are git tags.
 
 ### Try it in 60 seconds
 
@@ -61,7 +76,7 @@ No session needed. Make two throwaway repos and hand the guard the exact payload
 ```bash
 mkdir -p /tmp/rg-demo && cd /tmp/rg-demo && git init -q mine && git init -q theirs
 echo '{"tool_name":"Bash","tool_input":{"command":"git -C ../theirs push"},"cwd":"/tmp/rg-demo/mine"}' \
-  | python3 <base>/repo-guards/plugins/repo-guards/hooks/scripts/scope_foreign_commits.py
+  | python3 "$BASE/repo-guards/plugins/repo-guards/hooks/scripts/scope_foreign_commits.py"
 ```
 
 It answers `"permissionDecision": "deny"` with the reason the agent would read. Change the command to `git -C ../theirs add a.txt` and it allows, with the other repo's state attached; to `git push` with `"cwd"` set to `theirs`, and it says nothing — that one is yours to make.
@@ -69,10 +84,10 @@ It answers `"permissionDecision": "deny"` with the reason the agent would read. 
 **Optional, and reported by every deploy until you do it or decide not to** — the working rules, loaded in every session in every repo:
 
 ```bash
-ln -s "<base>/repo-guards/rules/global-CLAUDE.md" ~/.claude/CLAUDE.md
+ln -s "$BASE/repo-guards/rules/global-CLAUDE.md" ~/.claude/CLAUDE.md
 ```
 
-If you already have a `~/.claude/CLAUDE.md` — or want rules of your own on top of these, such as the language you are answered in — do not replace it. Keep it, and add one line to it that imports the rules instead:
+If you already have a `~/.claude/CLAUDE.md` — or want rules of your own on top of these, such as the language you are answered in — do not replace it. Keep it, and add one line to it that imports the rules instead — with your `$BASE` written out, because an import line does not expand variables:
 
 ```
 @<base>/repo-guards/rules/global-CLAUDE.md
@@ -87,7 +102,7 @@ For the guardrails and skills to activate in a specific project (e.g., your fron
 ```
 This command reads the project, writes its entry in RepoGuards' `registry.json`, and — when the repo draws at least one skill track — writes the project's own `.claude/settings.json`. RepoGuards ships no tracks of its own beyond itself, so until you add a marketplace that does (such as App Factory), registration creates no file in the project.
 
-**Without the slash command**, an entry in `tools/registry.json` is three lines — a path relative to `<base>`, a role, and the tracks — followed by `python3 tools/deploy.py`:
+**Without the slash command**, an entry in `tools/registry.json` is three lines — a path relative to `$BASE`, a role, and the tracks — followed by `python3 "$BASE/repo-guards/tools/deploy.py"`. Add it **inside** the `projects` object the file already has, beside the `_example_*` entries: those are ignored (so is any name starting with `_`), and can stay or go.
 
 ```json
 "projects": {
@@ -107,7 +122,18 @@ While working on a project in parallel with others, these are the rules RepoGuar
 1. **Read the Injected Intelligence:** The moment you touch a foreign directory, the system injects a `[foreign]` message containing the remote status (including the Branch name). The agent must read this before continuing its edits.
 2. **Never `push` remotely:** Commands like `git -C ../other-repo push` are completely blocked. Push publishes an entire branch, which is too aggressive when executed "through the wall."
 3. **Do not collect garbage:** Never run `add .` on a foreign directory. Work surgically with exact paths, or let `close.py` do the heavy lifting for you.
-4. **Turn Completion Report:** At the end of any prompt where the agent left foreign files open without committing them, RepoGuards' Stop Guard will surface a warning to the screen: "You left a mess elsewhere."
+4. **Turn Completion Report:** At the end of any prompt where the agent left foreign files open without committing them, RepoGuards' Stop Guard lists each place under "Work left open outside this session's own `git status`", with what this session changed there, and points at `close.py`. It speaks only when something changed since it last spoke.
+
+---
+
+## Known limits
+
+A guard that pretends to full coverage is worse than one whose edge is known. These are the edges, and they are tested:
+
+* **What a script writes from the inside is out of reach.** `python3 build.py` can write anywhere, and nothing in the command line says so. The guards read tool calls and shell lines; they are not a file-system watcher.
+* **A command whose target is computed cannot be judged.** `git -C $DIR push` or a path built by `$(…)` resolves at run time, inside the shell — so the guard sees a variable and, by design, allows it. Everything it cannot parse with confidence, it allows.
+* **It fails open, always.** A malformed payload, an unreadable registry, a missing file — every one of them allows the operation. A guard that blocks by mistake stops work; a guard that crashes stops everything.
+* **`close.py` under-claims rather than over-claims.** A file written through a shell line is reported as changed but is never staged for you, and the report says so.
 
 ---
 
@@ -124,17 +150,6 @@ claude plugin uninstall grove@grove      # only after deploy reports repo-guards
 ```
 
 `/grove:deploy` is now `/repo-guards:deploy`, and `$GROVE` is now `$REPO_GUARDS`. For one release the old names keep working: deploy still writes `$GROVE`, every `GROVE_*` variable is still read, and `grove_repo` can still be imported. The old GitHub URL redirects. Your clone's directory name does not matter.
-
----
-
-## Known limits
-
-A guard that pretends to full coverage is worse than one whose edge is known. These are the edges, and they are tested:
-
-* **What a script writes from the inside is out of reach.** `python3 build.py` can write anywhere, and nothing in the command line says so. The guards read tool calls and shell lines; they are not a file-system watcher.
-* **A command whose target is computed cannot be judged.** `git -C $DIR push` or a path built by `$(…)` resolves at run time, inside the shell — so the guard sees a variable and, by design, allows it. Everything it cannot parse with confidence, it allows.
-* **It fails open, always.** A malformed payload, an unreadable registry, a missing file — every one of them allows the operation. A guard that blocks by mistake stops work; a guard that crashes stops everything.
-* **`close.py` under-claims rather than over-claims.** A file written through a shell line is reported as changed but is never staged for you, and the report says so.
 
 ---
 

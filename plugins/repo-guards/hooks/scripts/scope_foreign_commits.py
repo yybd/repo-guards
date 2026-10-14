@@ -95,6 +95,27 @@ def picture(root):
     return out
 
 
+def unpushed(root):
+    """The commits a push from `root` would publish, newest first, as lines to show.
+
+    The refusal used to point at `git log @{u}..HEAD` and leave the looking to the
+    agent — which is the one step a session about to push is least likely to take.
+    (count, lines); count 0 when nothing is ahead, None when git cannot say (no
+    upstream, no repo)."""
+    try:
+        p = subprocess.run(["git", "-C", root, "log", "--oneline", "--no-decorate",
+                            "@{u}..HEAD"], capture_output=True, text=True, timeout=5)
+    except Exception:
+        return None
+    if p.returncode != 0:
+        return None
+    lines = [ln.rstrip() for ln in p.stdout.splitlines() if ln.strip()]
+    out = ["  " + ln for ln in lines[:SHOW_MAX]]
+    if len(lines) > SHOW_MAX:
+        out.append(f"  … and {len(lines) - SHOW_MAX} more")
+    return len(lines), out
+
+
 def registry_roots():
     """Every root in the registry, protected or not — projects AND apps.
 
@@ -328,11 +349,20 @@ def main():
         name, root = there
 
         if sub == "push":
+            ahead = unpushed(root)
+            if ahead and ahead[0]:
+                would = (f"It would publish {ahead[0]} commit(s):\n"
+                         + "\n".join(ahead[1]) + "\n")
+            elif ahead:
+                would = "Nothing is ahead of the upstream there right now.\n"
+            else:
+                would = "git could not say what is ahead there (no upstream set?).\n"
             reason = (
                 f"`git push` targets the '{name}' repo ({root}), which this session is "
                 f"not standing in — this session is in {cwd}.\n"
                 f"A push publishes a WHOLE BRANCH, not the commit you just made, and it "
                 f"cannot be undone — including commits that were there before this session.\n"
+                + would +
                 f"Look first, from here:\n"
                 f"  git -C {root} log @{{u}}..HEAD --oneline    # everything this would publish\n"
                 f"  python3 $REPO_GUARDS/tools/close.py                    # every place, and its push radius\n"

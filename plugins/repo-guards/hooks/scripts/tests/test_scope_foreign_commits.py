@@ -245,6 +245,40 @@ for exp, label, cmd, cwd in UNREG:
     fails += 0 if ok else 1
     print(f"{'✓' if ok else '✗':2}{got:<8}{exp:<8}  {label}")
 
+# --- the push refusal names what it would have published ---
+# It used to say "look at git log @{u}..HEAD" and leave it there; the demo's caption said
+# it showed the commits. Now it does, and says so honestly when git cannot tell.
+print("\n-- push refusal lists the commits --")
+_up = os.path.join(_u, "up.git")
+subprocess.run(["git", "init", "-q", "--bare", _up], capture_output=True)
+_g = ["git", "-C", THEIRS, "-c", "user.name=t", "-c", "user.email=t@t"]
+
+
+def _reason(cwd, target):
+    p = subprocess.run([sys.executable, HOOK], capture_output=True, text=True, timeout=10,
+                       input=json.dumps({"tool_input": {"command": f"git -C {target} push"},
+                                         "cwd": cwd}))
+    try:
+        return json.loads(p.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+    except Exception:
+        return ""
+
+
+subprocess.run(_g + ["commit", "-q", "--allow-empty", "-m", "base"], capture_output=True)
+no_upstream = _reason(MINE, THEIRS)
+subprocess.run(_g + ["remote", "add", "origin", _up], capture_output=True)
+subprocess.run(_g + ["push", "-q", "-u", "origin", "HEAD"], capture_output=True)
+level = _reason(MINE, THEIRS)
+for i in (1, 2, 3):
+    subprocess.run(_g + ["commit", "-q", "--allow-empty", "-m", f"ahead {i}"], capture_output=True)
+ahead = _reason(MINE, THEIRS)
+for ok, label in [("could not say what is ahead" in no_upstream, "no upstream: says git cannot tell"),
+                  ("Nothing is ahead" in level, "level with upstream: says nothing is ahead"),
+                  ("It would publish 3 commit(s)" in ahead, "three ahead: counts them"),
+                  (all(f"ahead {i}" in ahead for i in (1, 2, 3)), "and lists each one")]:
+    fails += 0 if ok else 1
+    print(f"{'✓' if ok else '✗':2}{'yes' if ok else 'no':<8}{'yes':<8}  {label}")
+
 # fail-open cases: malformed input must never crash and never deny
 print("\n-- fails open --")
 for label, raw in [("empty stdin", ""), ("malformed JSON", "{{{"),
