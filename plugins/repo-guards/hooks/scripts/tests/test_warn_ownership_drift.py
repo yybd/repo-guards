@@ -1,6 +1,6 @@
 """Branch pipeline for warn_ownership_drift.py.
 
-    python3 plugins/grove/hooks/scripts/tests/test_warn_ownership_drift.py
+    python3 plugins/repo-guards/hooks/scripts/tests/test_warn_ownership_drift.py
 
 Everything runs against a throwaway registry and throwaway places, because the property
 worth pinning is that it stays SILENT — silent outside a registered place, silent where
@@ -15,7 +15,7 @@ SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    base = os.path.realpath(tempfile.mkdtemp(prefix="grove-drift-test-"))
+    base = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-drift-test-"))
     fails = 0
 
     def check(ok, label, detail=""):
@@ -41,8 +41,8 @@ def main():
         p = subprocess.run([sys.executable, HOOK], input=payload, capture_output=True,
                            text=True, timeout=15, cwd=base,
                            env=dict(os.environ,
-                                    GROVE_REGISTRY=os.path.join(base, "registry.json"),
-                                    GROVE_OWNS_STATE=os.path.join(base, "state"),
+                                    REPO_GUARDS_REGISTRY=os.path.join(base, "registry.json"),
+                                    REPO_GUARDS_OWNS_STATE=os.path.join(base, "state"),
                                     PYTHONPATH=SCRIPTS))
         if p.returncode != 0:
             return "CRASH", (p.stderr.strip() or "nonzero exit")[:120]

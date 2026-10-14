@@ -4,7 +4,7 @@
 
 The recorder runs on EVERY tool call, so the properties that matter most are that it
 never blocks, never prints, and never raises — those are checked against malformed
-input as well as good. State goes to a throwaway dir via GROVE_TOUCHED_STATE.
+input as well as good. State goes to a throwaway dir via REPO_GUARDS_TOUCHED_STATE.
 """
 import json, os, shutil, subprocess, sys, tempfile
 
@@ -26,7 +26,7 @@ def fire(state, payload, raw=None):
     p = subprocess.run([sys.executable, HOOK],
                        input=raw if raw is not None else json.dumps(payload),
                        capture_output=True, text=True, timeout=30,
-                       env=dict(os.environ, GROVE_TOUCHED_STATE=state))
+                       env=dict(os.environ, REPO_GUARDS_TOUCHED_STATE=state))
     return p.returncode, p.stdout, p.stderr
 
 
@@ -36,7 +36,7 @@ def load(state, sid="s1"):
 
 
 def main():
-    base = tempfile.mkdtemp(prefix="grove-rec-test-")
+    base = tempfile.mkdtemp(prefix="repo-guards-rec-test-")
     fails = 0
 
     def check(ok, label, detail=""):

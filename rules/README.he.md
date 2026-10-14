@@ -6,7 +6,7 @@
 ‏`global-CLAUDE.he.md` הוא אותם כללים בעברית, מונח לצדו עבור הקורא ולא עבור הסוכן:
 
 ```bash
-ln -s $GROVE/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
+ln -s $REPO_GUARDS/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
 הפקודה האחת הזו היא כל ההתקנה, והיא לכל מכונה בנפרד.
@@ -14,7 +14,7 @@ ln -s $GROVE/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
 **כללים משלך נכתבים לצד אלה, לא בתוכם.** הקובץ הזה משותף: מי שמקשר אליו מקבל כל שורה שבו. לכן העדפה שהיא רק שלך (השפה שבה עונים לך, סגנון בית) אינה שייכת לכאן. במקום זאת הפוך את `~/.claude/CLAUDE.md` לקובץ משלך, וייבא ממנו את הכללים האלה:
 
 ```
-@$GROVE/rules/global-CLAUDE.md   ← כנתיב מלא; @ אינו מרחיב משתנים
+@$REPO_GUARDS/rules/global-CLAUDE.md   ← כנתיב מלא; @ אינו מרחיב משתנים
 
 ## שלי
 …

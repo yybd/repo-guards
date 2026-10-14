@@ -4,7 +4,7 @@ The project rule (CLAUDE.md, "The guard") says a guard must fail open and that e
 change is run across all branches before it takes effect. This is that pipeline —
 versioned so the rule is checkable rather than remembered.
 
-    python3 plugins/grove/hooks/scripts/tests/test_scope_foreign_commits.py
+    python3 plugins/repo-guards/hooks/scripts/tests/test_scope_foreign_commits.py
 
 Exits non-zero on any failure. Every deny case must deny, every allow case must
 allow, and the malformed-input cases must allow rather than crash.
@@ -19,31 +19,31 @@ import atexit, json, os, shutil, subprocess, sys, tempfile
 # migration if the sources had been kept "just in case".
 SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SCRIPTS)
-from grove_repo import grove_root, resolve_root  # noqa: E402
+from guards_repo import guards_root, resolve_root  # noqa: E402
 
 HOOK = os.path.join(SCRIPTS, "scope_foreign_commits.py")
-FACTORY = grove_root()
+FACTORY = guards_root()
 if not FACTORY:
-    sys.exit("✗ grove repo was not found. This pipeline checks against the live registry.")
+    sys.exit("✗ RepoGuards repo was not found. This pipeline checks against the live registry.")
 
 # From the live registry rather than hardcoded: this pipeline is the one that asserts
 # against real roots, so it must read the same file the guard reads.
 #
 # And it has to work on a machine that is not this one. Naming three specific repos made
-# this test unpassable for anybody who installed grove — their registry holds their
+# this test unpassable for anybody who installed RepoGuards — their registry holds their
 # repos, not these. So: use whatever the registry actually has, and when it has too
 # little (a fresh clone has the template), build a registry of throwaway repos and test
 # against that instead. The guard cannot tell the difference; the assertions are the same.
 def _load():
     """The registry the GUARD will read — registry_path(), not the repo's file.
 
-    They are the same thing until someone sets GROVE_REGISTRY, and then they are not:
+    They are the same thing until someone sets REPO_GUARDS_REGISTRY, and then they are not:
     the test picked real repos out of this machine's registry while the guard, reading an
     empty override, saw none and allowed everything. 28 checks failed and the guard was
     correct in every one of them.
     """
     try:
-        from grove_repo import registry_path
+        from guards_repo import registry_path
         with open(registry_path(), encoding="utf-8") as f:
             return json.load(f)
     except Exception:
@@ -58,7 +58,7 @@ def _live_roots(reg):
             if not n.startswith("_") and isinstance(e, dict) and e.get("repo")]
     projects = [p for p in projects if p and os.path.isdir(p)]
     apps = [a for a in apps if a and os.path.isdir(a)]
-    # grove itself is one of them, and the test needs roots that are NOT it
+    # RepoGuards itself is one of them, and the test needs roots that are NOT it
     others = [p for p in projects if p != FACTORY]
     if len(others) >= 2 and apps:
         return others[0], others[1], apps[0]
@@ -67,7 +67,7 @@ def _live_roots(reg):
 
 def _fixture():
     """Three throwaway repos and a registry naming them, for a machine with no tree yet."""
-    base = os.path.realpath(tempfile.mkdtemp(prefix="grove-scope-fixture-"))
+    base = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-scope-fixture-"))
     atexit.register(shutil.rmtree, base, True)
     made = []
     for name in ("hub", "site", "app"):
@@ -81,7 +81,7 @@ def _fixture():
     path = os.path.join(base, "registry.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(reg, f)
-    os.environ["GROVE_REGISTRY"] = path          # the guard reads this one from now on
+    os.environ["REPO_GUARDS_REGISTRY"] = path          # the guard reads this one from now on
     return tuple(made)
 
 
@@ -185,7 +185,7 @@ CASES += [
     ("context", "clean -fd is reported, not refused", f"git -C {HUB} clean -fd",         FACTORY),
     ("allow", "a command line that is a variable", 'sh -c "$CMD"',                       FACTORY),
     ("allow", "a loop variable cannot be resolved", "for d in %s; do git -C $d commit -am x; done" % HUB, FACTORY),
-    ("allow", "the command quoted inside an argument", "echo 'git -C %s commit -am x' > /tmp/grove-note" % HUB, FACTORY),
+    ("allow", "the command quoted inside an argument", "echo 'git -C %s commit -am x' > /tmp/repo-guards-note" % HUB, FACTORY),
 ]
 
 fails = 0

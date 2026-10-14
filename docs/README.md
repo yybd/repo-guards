@@ -1,6 +1,6 @@
 *English · [עברית](README.he.md)*
 
-# Grove decisions
+# RepoGuards decisions
 
 **What this folder is.** For each architectural decision, a document saying **why** it
 was made, what was measured to settle it, and what was **rejected and on what grounds**.
@@ -37,7 +37,7 @@ ruled out.**
 
 The shipping side of this work — the data layer the release skills read, the website the
 stores check, the product plan — lives in **the app factory**, which is the companion
-repo and a marketplace of its own. Grove governs where those skills load; it does not
+repo and a marketplace of its own. RepoGuards governs where those skills load; it does not
 carry them.
 
 **And how a skill gets from the file to the session it runs in** — that is mechanics

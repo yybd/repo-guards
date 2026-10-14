@@ -4,9 +4,9 @@
 
 **Status:** decided and applied 2026-09-08. Corrected 2026-09-10.
 
-> **Where the numbers come from.** Grove ships two skills of its own. Everything measured
+> **Where the numbers come from.** RepoGuards ships two skills of its own. Everything measured
 > below was measured on **the app factory** — the marketplace of app-shipping tracks that
-> stands on grove — because that is where a library large enough to have a placement
+> stands on RepoGuards — because that is where a library large enough to have a placement
 > problem actually exists. The rule is enforced here; the evidence was taken there.
 
 ## What was found
@@ -45,7 +45,7 @@ It runs from:
                                              ^^^^^ pinned to a commit
 ```
 
-An absolute path to `$GROVE/plugins/...` would be right today, wrong after every
+An absolute path to `$REPO_GUARDS/plugins/...` would be right today, wrong after every
 update, and would not survive installing the marketplace on another machine.
 `${CLAUDE_PLUGIN_ROOT}` resolves to what is **actually loaded**.
 
@@ -83,7 +83,7 @@ depend on an environment variable somebody set.
 ### Outside the plugin system → the repo path
 
 A project's local skill, or a maintenance document, does not run inside a plugin and has
-no `${CLAUDE_PLUGIN_ROOT}`. There, `$GROVE/plugins/<track>/skills/...` is the
+no `${CLAUDE_PLUGIN_ROOT}`. There, `$REPO_GUARDS/plugins/<track>/skills/...` is the
 answer — stable, and the marketplace source points there anyway.
 
 *A caveat worth knowing:* a project's local skills could name the skill instead of the

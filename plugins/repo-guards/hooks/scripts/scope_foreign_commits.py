@@ -37,10 +37,10 @@ command it cannot parse with confidence, allows — a guard that blocks by accid
 stops work, and one that crashes stops everything.
 """
 import json, os, subprocess, sys
-# The guard ships inside grove and runs from the plugin cache, where
-# nothing sits two directories above it. grove_repo finds the live repo — and reads the
+# The guard ships inside RepoGuards and runs from the plugin cache, where
+# nothing sits two directories above it. guards_repo finds the live repo — and reads the
 # shell line, which its sibling guard must read the same way.
-from grove_repo import registry_path, registry_roots as all_registry_roots, shell_commands
+from guards_repo import registry_path, registry_roots as all_registry_roots, shell_commands
 
 REGISTRY = registry_path()
 
@@ -303,7 +303,7 @@ def main():
                 f"them written before that session existed.\n"
                 f"Look first, from here:\n"
                 f"  git -C {root} log @{{u}}..HEAD --oneline    # everything this would publish\n"
-                f"  python3 $GROVE/tools/close.py                    # every place, and its push radius\n"
+                f"  python3 $REPO_GUARDS/tools/close.py                    # every place, and its push radius\n"
                 f"Then either move the session to {root} and push there, or ask the owner "
                 f"to push. Do not push a branch you have no picture of."
             )
@@ -318,7 +318,7 @@ def main():
                 f"  git -C {root} add <the paths you wrote>\n"
                 f"  git -C {root} status --short      # nothing else staged?\n"
                 f"  git -C {root} commit -m \"…\"       # in that repo's terms\n"
-                f"Or let `python3 $GROVE/tools/close.py --commit -m \"…\"` do it for every "
+                f"Or let `python3 $REPO_GUARDS/tools/close.py --commit -m \"…\"` do it for every "
                 f"place at once — it stages only the paths this session actually wrote."
             )
         print(json.dumps({
@@ -344,7 +344,7 @@ def main():
             f"[foreign] `git {sub}` reaches into '{name}' ({root}), and this session stands in {cwd}. "
             f"What is dirty there is invisible from here — this is it:\n"
             + "\n".join(shown)
-            + "\nStage only what you wrote. `python3 $GROVE/tools/close.py` shows every place at once."
+            + "\nStage only what you wrote. `python3 $REPO_GUARDS/tools/close.py` shows every place at once."
         )}}))
 
 

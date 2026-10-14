@@ -31,9 +31,9 @@ settle.
 
 **"A separate session per repo."** A stronger enforcement, and it solves exactly the same
 failures. **And it pays dearly: the transcript does not travel.** Measured: 3 of 10
-commits in the site repo on one day rested on knowledge created in grove — including
+commits in the site repo on one day rested on knowledge created in RepoGuards — including
 a dashboard built **with none** of the three design skills loaded. A session born in the
-site can **read** grove; it cannot know **what was weighed and rejected there**.
+site can **read** RepoGuards; it cannot know **what was weighed and rejected there**.
 
 **"Just read the target's `CLAUDE.md`."** Possible — it was proven readable from outside.
 Rejected **as the only solution**: it is a decision you have to **remember to make**, and
@@ -117,5 +117,5 @@ project, and writing to one is correct.
 
 | | What | Requires |
 |---|---|---|
-| **1** | **An audit script for stuck memory** — a cheap heuristic: a memory whose name or description names a project other than the one it is filed under. It catches the leak class that has already occurred twice | a session in grove |
-| **2** | **The seal** — refusing to end a turn while a place is open. Deliberately unbuilt: blocking on a report requires the report to be right, and the measurement that would justify it failed once already | a session in grove |
+| **1** | **An audit script for stuck memory** — a cheap heuristic: a memory whose name or description names a project other than the one it is filed under. It catches the leak class that has already occurred twice | a session in RepoGuards |
+| **2** | **The seal** — refusing to end a turn while a place is open. Deliberately unbuilt: blocking on a report requires the report to be right, and the measurement that would justify it failed once already | a session in RepoGuards |

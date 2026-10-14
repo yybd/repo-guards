@@ -73,7 +73,7 @@ Fails OPEN: any error allows the write. A broken guard must not stop work.
 import json, os, re, sys
 # The two guards judge the same shell line and must read it the same way — see
 # shell_commands there. Splitting it twice is how two answers drift apart.
-from grove_repo import shell_commands
+from guards_repo import shell_commands
 
 CLAIMS = os.path.join(".claude", "owns.json")
 

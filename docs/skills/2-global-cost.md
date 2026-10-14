@@ -7,9 +7,9 @@
 
 ---
 
-> **Where the numbers come from.** Grove ships two skills of its own. Everything measured
+> **Where the numbers come from.** RepoGuards ships two skills of its own. Everything measured
 > below was measured on **the app factory** — the marketplace of app-shipping tracks that
-> stands on grove — because that is where a library large enough to have a placement
+> stands on RepoGuards — because that is where a library large enough to have a placement
 > problem actually exists. The rule is enforced here; the evidence was taken there.
 
 ## In short
@@ -178,5 +178,5 @@ it hurting in practice. Changing the architecture on the strength of a number no
 to be harmful is trading a known problem for a new one — the silent failure.
 
 **What is missing, and is cheap:** a periodic measurement of the total. The problem is
-not 7,994; it is that there is no moment at which anyone compares. Grove dashboard
+not 7,994; it is that there is no moment at which anyone compares. RepoGuards dashboard
 already shows state, and this is a number that belongs there.

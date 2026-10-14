@@ -11,9 +11,9 @@ registered. Claude Code reads project settings from the session's own directory,
 from the git root — measured 2026-09-09 with `claude plugin list`, which resolves them
 the same way:
 
-    <project>/              five tracks + grove
-    <project>/apps/mobile/  grove only
-    <app>/Capacitor/        grove only
+    <project>/              five tracks + RepoGuards
+    <project>/apps/mobile/  RepoGuards only
+    <app>/Capacitor/        RepoGuards only
 
 So a session opened one directory in — `<app>/fastlane`, `ios/`, `apps/mobile`, which
 is exactly where release work happens — has no store track, no release track, nothing.
@@ -23,7 +23,7 @@ it has nothing to say about a session standing below it. That silence is now a s
 notice.
 
 That is the price of making the tracks per-project, and it is paid in the currency
-grove's README warns about: `A file never stops you; a missing skill does,
+RepoGuards' README warns about: `A file never stops you; a missing skill does,
 and quietly.` A session in an unregistered repo does not fail. It just does the work
 the long way, without the skill that was written for exactly it, and without ever
 mentioning that a track was missing. There is no error to notice, so the notice has to
@@ -39,7 +39,7 @@ speak, and a person waiting for a reply.
 
 It only ever REPORTS. It cannot enable a track — plugin enablement is read at
 session start, before this ever runs — so it points at the register-project skill,
-which is in grove, the plugin that loads everywhere.
+which is in RepoGuards, the plugin that loads everywhere.
 That is why that plugin exists.
 
 Noise is what kills a hook like this — but a seven-day cooldown killed it the other
@@ -57,7 +57,7 @@ session, never again as an interruption.
 That distinction is the whole of it. A cooldown makes the notice absent exactly when you
 are working in the repo; asking a fourth time makes it wallpaper. Neither of those is
 "stop asking after an answer" — and an answer is still what ends it: register the repo,
-or list it under `ignored`. `GROVE_OFFER=off`, or `"offer_registration": false` in the
+or list it under `ignored`. `REPO_GUARDS_OFFER=off`, or `"offer_registration": false` in the
 registry, is the other answer, for someone whose machine holds a hundred repos that are
 nobody's business.
 
@@ -65,16 +65,16 @@ Fails silent: any error reports nothing. A hook that crashes at the start of eve
 session is worse than no hook.
 """
 import hashlib, json, os, subprocess, sys, time
-# The guard ships inside grove and runs from the plugin cache, where
-# nothing sits two directories above it. grove_repo finds the live repo.
-from grove_repo import registry_path, projects, apps, resolve_root
+# The guard ships inside RepoGuards and runs from the plugin cache, where
+# nothing sits two directories above it. guards_repo finds the live repo.
+from guards_repo import registry_path, projects, apps, resolve_root
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Overridable so the pipeline can run against a throwaway registry and state dir. Testing
 # this against the real registry would mean the test's verdict depends on which repos the
 # owner happens to have registered today.
 REGISTRY = registry_path()
-STATE_DIR = os.environ.get("GROVE_OFFER_STATE") or os.path.expanduser("~/.claude/.grove/offered")
+STATE_DIR = os.environ.get("REPO_GUARDS_OFFER_STATE") or os.path.expanduser("~/.claude/.repo-guards/offered")
 # How many sessions a repo is ASKED about before the notice becomes a single line. Not a
 # silence and not a cooldown — see the module note.
 ASK_LIMIT = 3
@@ -98,7 +98,7 @@ def known_roots(reg):
     """(name, root, tracks) for every path the registry has an answer for.
 
     The tracks come along because the second notice needs to name what is missing, and
-    because a root with none — grove itself — has nothing to warn about.
+    because a root with none — RepoGuards itself — has nothing to warn about.
 
     `ignored` entries come back with tracks None: "never ask" is an answer about the
     whole tree, and it has to silence the subdirectory notice as well as the offer.
@@ -182,7 +182,7 @@ def seen_count(path, bump):
 
 
 def switched_off(reg):
-    if (os.environ.get("GROVE_OFFER") or "").strip().lower() in ("off", "0", "false", "no"):
+    if ((os.environ.get("REPO_GUARDS_OFFER") or os.environ.get("GROVE_OFFER")) or "").strip().lower() in ("off", "0", "false", "no"):
         return True
     return isinstance(reg, dict) and reg.get("offer_registration") is False
 
@@ -235,17 +235,17 @@ def main():
         asked = seen_count(cwd, bump=True)
         if asked >= ASK_LIMIT:
             print(
-                f"[grove] Still a subdirectory of '{name}' — none of that repo's tracks "
+                f"[repo-guards] Still a subdirectory of '{name}' — none of that repo's tracks "
                 f"({', '.join(tracks)}) load here, because settings are read from the "
                 f"session's own directory. Reopen at {kroot}, or register this directory "
                 f"with the register-project skill. Said once per session; no answer needed."
             )
             return
         print(
-            f"[grove] This session is in a SUBDIRECTORY of '{name}' ({kroot}). Claude Code "
+            f"[repo-guards] This session is in a SUBDIRECTORY of '{name}' ({kroot}). Claude Code "
             f"reads project settings from the session's own directory, so NONE of that repo's "
             f"tracks are loaded here — missing: {', '.join(tracks)}. Only the always-on "
-            f"grove is loaded.\n"
+            f"RepoGuards is loaded.\n"
             f"BEFORE answering the user's message, ask them with AskUserQuestion: header "
             f"\"Directory\", options \"Reopen at the repo root\" (the tracks load there; this "
             f"session cannot load them, plugins are read at startup), \"Register this "
@@ -268,9 +268,9 @@ def main():
     # here — and a notice that disappears is indistinguishable from a problem that did.
     if seen_count(cwd, bump=True) >= ASK_LIMIT:
         print(
-            f"[grove] Not on the registry: {where} — no track is enabled here. "
+            f"[repo-guards] Not on the registry: {where} — no track is enabled here. "
             f"The register-project skill puts it on; `ignored` in the registry stops this "
-            f"line for good, and `GROVE_OFFER=off` stops it everywhere. No answer needed."
+            f"line for good, and `REPO_GUARDS_OFFER=off` stops it everywhere. No answer needed."
         )
         return
 
@@ -282,7 +282,7 @@ def main():
     # explanation and the model reasonably got on with the user's actual request
     # instead. What has to survive is one instruction.
     print(
-        f"[grove] This repo is not on the registry: {where} — so no track is "
+        f"[repo-guards] This repo is not on the registry: {where} — so no track is "
         f"enabled here, and nothing said so.\n"
         f"BEFORE answering the user's message, ask them about it with AskUserQuestion: "
         f"header \"Registry\", options \"Register it\" (run the register-project "

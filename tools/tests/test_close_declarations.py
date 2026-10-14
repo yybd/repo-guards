@@ -34,7 +34,7 @@ def declare(root, plugin, skill, marker, sha=None):
 
 
 def main():
-    base = os.path.realpath(tempfile.mkdtemp(prefix="grove-close-test-"))
+    base = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-close-test-"))
     fails = 0
 
     def check(ok, label, detail=""):
@@ -47,12 +47,12 @@ def main():
         cache = os.path.join(base, "cache", "some-marketplace")
         mine = os.path.join(base, "ran-ours")
         theirs = os.path.join(base, "ran-theirs")
-        declare(ours, "grove", "ours-op", mine)
+        declare(ours, "repo-guards", "ours-op", mine)
         declare(cache, "their-plugin", "theirs-op", theirs, sha="abc123")
 
         def run(*args):
-            env = dict(os.environ, GROVE_PLUGINS=ours,
-                       GROVE_PLUGIN_CACHE=os.path.dirname(cache))
+            env = dict(os.environ, REPO_GUARDS_PLUGINS=ours,
+                       REPO_GUARDS_PLUGIN_CACHE=os.path.dirname(cache))
             p = subprocess.run([sys.executable, CLOSE] + list(args),
                                capture_output=True, text=True, timeout=120, env=env)
             return p.stdout + p.stderr

@@ -31,7 +31,7 @@ import ast, importlib.util, os, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
-# Where a skill's scripts live, plus grove's own commands. The guards are left
+# Where a skill's scripts live, plus RepoGuards' own commands. The guards are left
 # out on purpose: they each have a branch pipeline that already runs them.
 ROOTS = [os.path.join(REPO, "plugins"), HERE]
 SKIP = {"tests", "__pycache__", "node_modules", ".git", "dashboard"}

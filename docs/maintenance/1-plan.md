@@ -72,17 +72,17 @@ The one number that is a rule: **`failed` must be empty in every recorded line.*
 ## The obligation to the other repo
 
 The app factory runs **these scripts** against its own checkout —
-`sync_project_settings.py` and `verify_guards.py`, with `GROVE_REPO` and
-`GROVE_MARKETPLACE` in the environment — and imports `grove_repo` through its own
-`factory/grove.py`. So four things here are a **public interface**, and changing one is a
+`sync_project_settings.py` and `verify_guards.py`, with `REPO_GUARDS_REPO` and
+`REPO_GUARDS_MARKETPLACE` in the environment — and imports `guards_repo` through its own
+`factory/repo_guards.py`. So four things here are a **public interface**, and changing one is a
 change in two repos:
 
-1. `grove_repo`'s function names and return shapes (`resolve_root`, `anchors`,
+1. `guards_repo`'s function names and return shapes (`resolve_root`, `anchors`,
    `registry_roots`, `ownership_gaps`).
-2. The `GROVE_*` environment variables that redirect a tool at another tree.
+2. The `REPO_GUARDS_*` environment variables that redirect a tool at another tree.
 3. `warn_stale_plugin_cache.findings()` — imported in-process by both deploys.
 4. The registry's shape, since both read the same file. It gained an optional `base`
-   key on 2026-09-11 — where the tree sits, for an installation that did not clone grove
+   key on 2026-09-11 — where the tree sits, for an installation that did not clone RepoGuards
    beside its repos. Additive: a registry without it behaves exactly as before, and the
    other repo needs no change to keep working. It does need to know the key exists
    before it writes a registry of its own.
@@ -126,7 +126,7 @@ four bugs — two of them on 2026-09-11, and both in the same fifteen minutes:
   no plugin cache because it has never installed one. A warning about the absence of a
   problem, on every new machine.
 - and worse, it then said **"every installed copy already matches the repo, nothing to
-  deploy"** — on a machine where grove was not installed at all. A missing
+  deploy"** — on a machine where RepoGuards was not installed at all. A missing
   `installed_plugins.json` was read as *nothing is known* rather than *nothing is
   installed*, so the one command a new user runs did nothing and reported success.
 

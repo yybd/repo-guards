@@ -18,7 +18,7 @@ body:
     id: what
     attributes:
       label: The tool call and the guard's message
-      description: The command or edit the agent made, where the session was standing, and what grove printed. Paste it whole.
+      description: The command or edit the agent made, where the session was standing, and what RepoGuards printed. Paste it whole.
       render: text
     validations:
       required: true

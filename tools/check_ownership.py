@@ -12,7 +12,7 @@ call and can stop work when it is wrong. A drift between a skill and a declarati
 not urgent — it is wrong for as long as nobody looks — so it is asked in the two places
 where it is cheap: here, across every registered place, inside `deploy.py`; and at the
 end of a turn about the place the session is standing in, by `warn_ownership_drift.py`.
-The two are the same four questions from `grove_repo.ownership_gaps`, because a
+The two are the same four questions from `guards_repo.ownership_gaps`, because a
 detector that answers differently depending on who asked is worse than none.
 
 Four questions, and the last two are the reverse direction — a declaration outliving
@@ -33,10 +33,10 @@ import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-sys.path.insert(0, os.path.join(REPO, "plugins", "grove", "hooks", "scripts"))
-import grove_repo as fr                                  # noqa: E402
+sys.path.insert(0, os.path.join(REPO, "plugins", "repo-guards", "hooks", "scripts"))
+import guards_repo as fr                                  # noqa: E402
 
-# The four questions live in grove_repo, next to the guard they are about, so
+# The four questions live in guards_repo, next to the guard they are about, so
 # the end-of-turn hook and this deploy-time sweep can never answer them
 # differently. This file is the sweep and the wording; the judgement is there.
 
@@ -52,7 +52,7 @@ def _help_only():
 def main():
     _help_only()
     try:
-        # fr.registry_path(), not HERE/registry.json: it honours GROVE_REGISTRY and
+        # fr.registry_path(), not HERE/registry.json: it honours REPO_GUARDS_REGISTRY and
         # finds the repo from anywhere. Reading the neighbour file worked only because
         # this script happens to sit beside it — which is the assumption portability
         # is supposed to have removed.

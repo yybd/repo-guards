@@ -2,7 +2,7 @@
 """Write each registered repo's .claude/settings.json from the registry's `tracks`.
 
 The tracks are installed once, on the machine, and until now that meant they
-loaded EVERYWHERE — in the website, in an unrelated repo, in grove itself. The
+loaded EVERYWHERE — in the website, in an unrelated repo, in RepoGuards itself. The
 README decides where a skill belongs by asking "which directory is the session standing
 in when I need it?", but nothing enforced the answer: `enabledPlugins` in the user's
 settings is one global switch per track.
@@ -15,12 +15,12 @@ gets; this turns those arrays into the files that make it true.
     python3 tools/sync_project_settings.py           write the settings files
     python3 tools/sync_project_settings.py --check   report drift, change nothing
 
-It is deliberately narrow: it owns only the `grove@grove` keys inside
+It is deliberately narrow: it owns only the `repo-guards@repo-guards` keys inside
 `enabledPlugins`, and leaves every other key in those files — and every plugin from
 another marketplace — exactly as it found it. The repos are under git, which is the
 backup; what this must not do is quietly drop a setting git would then record as ours.
 
-The track names are checked against the plugins actually on disk. Grove rule is to
+The track names are checked against the plugins actually on disk. RepoGuards rule is to
 count rather than copy, and a registry that names a track nobody ships would produce a
 settings file that silently enables nothing.
 """
@@ -28,15 +28,15 @@ import argparse, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-REGISTRY = os.environ.get("GROVE_REGISTRY") or os.path.join(HERE, "registry.json")
-PLUGINS = os.environ.get("GROVE_PLUGINS") or os.path.join(REPO, "plugins")
-MARKETPLACE = os.environ.get("GROVE_MARKETPLACE") or "grove"
+REGISTRY = (os.environ.get("REPO_GUARDS_REGISTRY") or os.environ.get("GROVE_REGISTRY")) or os.path.join(HERE, "registry.json")
+PLUGINS = (os.environ.get("REPO_GUARDS_PLUGINS") or os.environ.get("GROVE_PLUGINS")) or os.path.join(REPO, "plugins")
+MARKETPLACE = (os.environ.get("REPO_GUARDS_MARKETPLACE") or os.environ.get("GROVE_MARKETPLACE")) or "repo-guards"
 # The registry says how the tree is SHAPED; where it sits is this machine's business,
-# and only grove_repo knows how to join the two.
-# grove_repo comes from THIS checkout, not from PLUGINS: when another marketplace runs
-# this script against its own tree, PLUGINS is that tree's plugins and holds no grove.
-sys.path.insert(0, os.path.join(REPO, "plugins", "grove", "hooks", "scripts"))
-from grove_repo import resolve_root                       # noqa: E402
+# and only guards_repo knows how to join the two.
+# guards_repo comes from THIS checkout, not from PLUGINS: when another marketplace runs
+# this script against its own tree, PLUGINS is that tree's plugins and holds no RepoGuards.
+sys.path.insert(0, os.path.join(REPO, "plugins", "repo-guards", "hooks", "scripts"))
+from guards_repo import resolve_root                       # noqa: E402
 
 
 def real(p):
@@ -60,7 +60,7 @@ def shipped_tracks():
 def targets(reg):
     """(name, root, tracks) for every registry entry that has a repo on disk.
 
-    Roots come back through grove_repo.resolve_root, which is the only place that
+    Roots come back through guards_repo.resolve_root, which is the only place that
     knows a relative root is relative to the tree's base. Four files used to expand
     them four ways; one of them would have to be found and fixed on a second machine.
     """
@@ -79,9 +79,9 @@ def targets(reg):
 def desired(tracks, shipped):
     """Only the tracks this marketplace actually ships.
 
-    A registry entry may name tracks that come from somewhere else — grove is one
+    A registry entry may name tracks that come from somewhere else — RepoGuards is one
     marketplace among the ones a machine has installed, and a track it does not ship is
-    not its business to enable. `plan` touches only `@grove` keys for the same reason,
+    not its business to enable. `plan` touches only `@repo-guards` keys for the same reason,
     so the two marketplaces write the same file without either erasing the other.
     """
     return {f"{t}@{MARKETPLACE}": True for t in tracks if t in shipped}
@@ -122,7 +122,7 @@ def write(path, merged):
         f.write("\n")
 
 
-USER_SETTINGS = os.environ.get("GROVE_SETTINGS") or os.path.expanduser(
+USER_SETTINGS = os.environ.get("REPO_GUARDS_SETTINGS") or os.path.expanduser(
     "~/.claude/settings.json")
 
 
@@ -136,7 +136,7 @@ def sync_anchors(reg, check):
 
     (path, before, after) so the caller can report; nothing else in the file is touched.
     """
-    from grove_repo import anchors
+    from guards_repo import anchors
     want = anchors(reg)
     data, _ = read_settings(USER_SETTINGS)
     env = dict(data.get("env") or {})
@@ -221,7 +221,7 @@ def main():
               f"  python3 {pretty(os.path.join(HERE, 'sync_project_settings.py'))}")
         return 1
     print(f"{drift} repos updated. The tracks load there from the next session.\n"
-          "Each such change is a commit in its own repo — the file belongs to it, not to grove.")
+          "Each such change is a commit in its own repo — the file belongs to it, not to RepoGuards.")
     return 0
 
 

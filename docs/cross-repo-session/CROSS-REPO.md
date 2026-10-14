@@ -31,7 +31,7 @@ opened in.
    app is written to the app's memory. The knowledge is stored in the wrong place and is
    never loaded again when working in the hub directly.
 
-## 3. How grove answers each one
+## 3. How RepoGuards answers each one
 
 It does not forbid cross-repo work — that work is necessary and cannot be removed. It
 puts up guards instead.
@@ -66,12 +66,12 @@ puts up guards instead.
 
 Instead of relying on session memory — which is saved against the wrong directory —
 knowledge gained during cross-repo work is written into a `LESSONS.md` **inside the
-skill's own folder in grove**. Because the skill travels everywhere it is loaded,
+skill's own folder in RepoGuards**. Because the skill travels everywhere it is loaded,
 its lessons travel with it, and they are available in every place the task runs.
 
 ## 4. The parts
 
-**Hooks** (`plugins/grove/hooks/scripts/`):
+**Hooks** (`plugins/repo-guards/hooks/scripts/`):
 
 * `honor_ownership.py` — enforces declared ownership on writes from elsewhere.
 * `scope_foreign_commits.py` — blocks sweeping git commands and `push` into a foreign

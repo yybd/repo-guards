@@ -1,9 +1,9 @@
 {
-  "name": "grove",
+  "name": "repo-guards",
   "description": "The cross-repo layer, and the only track that is always on. It refuses a write to a path another repo declared as its own, refuses `commit -a` and `push` into a repo this session is not standing in — and when it allows a foreign write, hands back that repo's git status so the blind spot closes. At the end of a turn it names what was left open elsewhere. `close.py` then reports every place at once and commits only what this session actually wrote.",
   "license": "MIT",
   "defaultEnabled": true,
   "author": {
-    "name": "Grove"
+    "name": "RepoGuards"
   }
 }

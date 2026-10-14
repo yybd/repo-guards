@@ -33,8 +33,8 @@ tool call is worse than no recorder.
 """
 import json, os, re, shlex, subprocess, sys, time
 
-STATE_DIR = os.environ.get("GROVE_TOUCHED_STATE") or os.path.expanduser(
-    "~/.claude/.grove/touched")
+STATE_DIR = os.environ.get("REPO_GUARDS_TOUCHED_STATE") or os.path.expanduser(
+    "~/.claude/.repo-guards/touched")
 
 PATH_KEYS = ("file_path", "path", "notebook_path")
 WRITE_KEYS = ("file_path", "notebook_path")     # `path` is a read/glob key, not a write

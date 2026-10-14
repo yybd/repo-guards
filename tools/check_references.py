@@ -141,11 +141,11 @@ _ANCHORS = None
 
 
 def VARS():
-    """One table, defined in grove_repo, shared with deploy. See anchors() there."""
+    """One table, defined in guards_repo, shared with deploy. See anchors() there."""
     global _ANCHORS
     if _ANCHORS is None:
-        sys.path.insert(0, os.path.join(REPO, "plugins", "grove", "hooks", "scripts"))
-        import grove_repo as fr
+        sys.path.insert(0, os.path.join(REPO, "plugins", "repo-guards", "hooks", "scripts"))
+        import guards_repo as fr
         _ANCHORS = fr.anchors()
     return _ANCHORS
 

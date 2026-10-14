@@ -1,6 +1,6 @@
 *English · [עברית](CLAUDE.he.md)*
 
-# Grove rules
+# RepoGuards rules
 
 Loaded **in addition to** `~/.claude/CLAUDE.md` (which is a symlink to
 `rules/global-CLAUDE.md` here), not instead of it. The global rules apply here too; what
@@ -48,7 +48,7 @@ python3 tools/deploy.py
 
 It syncs the settings files from the registry, refreshes the installed copies, and
 verifies. `--check` answers "is everything in place?" without changing anything. The
-equivalent inside a session is `/grove:deploy`.
+equivalent inside a session is `/repo-guards:deploy`.
 
 **Commit before deploying.** `claude plugin update` copies the **working tree** and tags
 it with HEAD, so deploying uncommitted work puts bytes in the cache that are in no
@@ -145,11 +145,11 @@ described — a skill name that is not here, or a path that vanished.
 `warn_ownership_drift` asks them **at the end of every turn, about the place you are
 standing in** — where the hole was made and where the reason is still remembered.
 `tools/check_ownership.py` asks them **about every place, inside `deploy.py`**. Both
-read `grove_repo.ownership_gaps`, because a detector that answers differently
+read `guards_repo.ownership_gaps`, because a detector that answers differently
 depending on who asked is worse than none. And the Stop guard speaks only when something
 **changed** — a gap already named stays quiet.
 
-`plugins/grove/hooks/scripts/honor_ownership.py` **must fail open.** Every
+`plugins/repo-guards/hooks/scripts/honor_ownership.py` **must fail open.** Every
 change to it is run across all its branches before it takes effect —
 `tools/verify_guards.py` — because a guard that blocks by mistake stops work, and a
 guard that crashes stops everything.

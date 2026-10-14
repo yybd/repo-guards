@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop guard: say when grove's global surface is not what this repo holds.
+"""Stop guard: say when RepoGuards' global surface is not what this repo holds.
 
 Two things here load in every session on the machine, by two different mechanisms:
 
@@ -39,23 +39,23 @@ doing a deploy nobody asked for, and would still need a restart to take effect.
 Fails silent: any error reports nothing.
 """
 import hashlib, json, os, subprocess, sys, time
-# The guard ships inside grove and runs from the plugin cache, where
-# nothing sits two directories above it. grove_repo finds the live repo.
-from grove_repo import grove_root
+# The guard ships inside RepoGuards and runs from the plugin cache, where
+# nothing sits two directories above it. guards_repo finds the live repo.
+from guards_repo import guards_root
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = grove_root()
+REPO = guards_root()
 
 # All overridable so the pipeline can drive throwaway trees. Pointing the tests at the
 # real ~/.claude would mean breaking the machine's own plugins to watch this fire.
-REPO_DIR = os.environ.get("GROVE_REPO") or REPO
-INSTALLED = os.environ.get("GROVE_INSTALLED_PLUGINS") or os.path.expanduser(
+REPO_DIR = (os.environ.get("REPO_GUARDS_REPO") or os.environ.get("GROVE_REPO")) or REPO
+INSTALLED = os.environ.get("REPO_GUARDS_INSTALLED_PLUGINS") or os.path.expanduser(
     "~/.claude/plugins/installed_plugins.json")
-USER_CLAUDE_MD = os.environ.get("GROVE_USER_CLAUDE_MD") or os.path.expanduser(
+USER_CLAUDE_MD = os.environ.get("REPO_GUARDS_USER_CLAUDE_MD") or os.path.expanduser(
     "~/.claude/CLAUDE.md")
-MARKETPLACE = os.environ.get("GROVE_MARKETPLACE") or "grove"
-STATE_DIR = os.environ.get("GROVE_STALE_STATE") or os.path.expanduser(
-    "~/.claude/.grove/stale-plugins")
+MARKETPLACE = (os.environ.get("REPO_GUARDS_MARKETPLACE") or os.environ.get("GROVE_MARKETPLACE")) or "repo-guards"
+STATE_DIR = os.environ.get("REPO_GUARDS_STALE_STATE") or os.path.expanduser(
+    "~/.claude/.repo-guards/stale-plugins")
 
 # Written by the plugin runtime into the installed copy, or by macOS/python into
 # either side. Neither is content, and comparing them would make every run differ.
@@ -158,7 +158,7 @@ def installs():
     honest answer there is "nothing is installed" — not "nothing is known". Measured on
     a clone in a temporary directory with an empty HOME, which is the state of every new
     user: `deploy.py` said *every installed copy already matches the repo, nothing to
-    deploy* and installed nothing, on a machine where grove was not installed at all.
+    deploy* and installed nothing, on a machine where RepoGuards was not installed at all.
     The one command a new user runs did nothing and reported success.
     """
     if not os.path.exists(INSTALLED):

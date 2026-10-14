@@ -6,7 +6,7 @@ change is run across all branches before it takes effect. This is that pipeline.
     python3 tools/hooks/tests/test_warn_uncommitted_roots.py
 
 Builds throwaway git repos and a throwaway registry, so it never touches app-hub,
-a real project or grove itself — dirtying a real repo to watch the hook fire is
+a real project or RepoGuards itself — dirtying a real repo to watch the hook fire is
 precisely what the hook exists to complain about. Exits non-zero on any failure.
 """
 import json, os, shutil, subprocess, sys, tempfile
@@ -47,7 +47,7 @@ def run(env, sid="s1", cwd=None, active=False):
 
 
 def main():
-    base = tempfile.mkdtemp(prefix="grove-stop-test-")
+    base = tempfile.mkdtemp(prefix="repo-guards-stop-test-")
     fails = 0
 
     def check(ok, label, detail=""):
@@ -69,7 +69,7 @@ def main():
         json.dump({"projects": {"alpha": {"root": alpha}, "beta": {"root": beta}},
                    "apps": {"gamma": {"repo": gamma}}}, open(reg, "w"))
         state = os.path.join(base, "state")
-        env = dict(os.environ, GROVE_REGISTRY=reg, GROVE_STOP_STATE=state)
+        env = dict(os.environ, REPO_GUARDS_REGISTRY=reg, REPO_GUARDS_STOP_STATE=state)
 
         # everything clean, first run -> silent
         msg, err = run(env)
@@ -82,7 +82,7 @@ def main():
               "existing dirt, a new session inside the registry → reported once", err or msg[:60])
 
         # the same first run from a project outside the registry must stay silent:
-        # pre-existing dirt in grove's repos is noise there
+        # pre-existing dirt in RepoGuards' repos is noise there
         msg, err = run(env, sid="s-outside", cwd=os.path.join(base, "unrelated"))
         check(msg == "", "the same dirt, a session in a foreign project → silent", err or msg[:80])
 
@@ -173,9 +173,9 @@ def main():
             ("empty stdin", "", env),
             ("malformed JSON", "{{{", env),
             ("no session_id", '{"cwd":"/tmp"}', env),
-            ("a missing registry", "{}", dict(env, GROVE_REGISTRY="/nonexistent/r.json")),
-            ("a malformed registry", "{}", dict(env, GROVE_REGISTRY=__file__)),
-            ("an unwritable state dir", "{}", dict(env, GROVE_STOP_STATE="/proc/nope/x")),
+            ("a missing registry", "{}", dict(env, REPO_GUARDS_REGISTRY="/nonexistent/r.json")),
+            ("a malformed registry", "{}", dict(env, REPO_GUARDS_REGISTRY=__file__)),
+            ("an unwritable state dir", "{}", dict(env, REPO_GUARDS_STOP_STATE="/proc/nope/x")),
         ]:
             p = subprocess.run([sys.executable, HOOK], input=raw, capture_output=True,
                                text=True, timeout=15, env=e)

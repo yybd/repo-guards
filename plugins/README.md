@@ -2,7 +2,7 @@
 
 # The plugins — how they reach every repo
 
-**What this folder is.** The tracks grove distributes as plugins.
+**What this folder is.** The tracks RepoGuards distributes as plugins.
 
 **What this document is.** Why it works the way it does, where exactly each thing is
 stored, and why editing here does **not** reach a session until a command is run.
@@ -12,7 +12,7 @@ stored, and why editing here does **not** reach a session until a command is run
 ## In short — two facts
 
 **1. Which repos load which track is decided by the registry,** through each repo's own
-`.claude/settings.json`. `grove` is the exception: it is enabled at user scope and
+`.claude/settings.json`. `RepoGuards` is the exception: it is enabled at user scope and
 therefore loads everywhere.
 
 **2. What loads is not this folder — it is a snapshot of it.** Installation copied the
@@ -25,7 +25,7 @@ it by itself. That second fact is the whole problem below.
 
 | Plugin | Skills | What |
 |---|---|---|
-| `grove` | 2 | `deploy` and `register-project` — the registry, and putting a repo on it |
+| `RepoGuards` | 2 | `deploy` and `register-project` — the registry, and putting a repo on it |
 
 *Counted from disk 2026-09-11.* One plugin, enabled at user scope, so its hooks run in
 every repo. Everything below is about how a plugin reaches a session at all, which is the
@@ -40,7 +40,7 @@ no update problem worth photographing.
 ### Two separate registrations
 
 **The marketplace** — the catalogue. `~/.claude/plugins/known_marketplaces.json`. The
-`grove` entry is of type `directory` and points at the repo itself. There is no
+`RepoGuards` entry is of type `directory` and points at the repo itself. There is no
 copy: `.claude-plugin/marketplace.json` is read live, in place.
 
 **The plugin** — what is installed. `~/.claude/plugins/installed_plugins.json`. Here,
@@ -50,12 +50,12 @@ catalogue is live, the plugin is a snapshot.
 ### What the copy contains
 
 Only the subtree the manifest's `source` points at. **No `.git`, no `docs/`, no
-`tools/`, no `CLAUDE.md`.** Grove's rules do not travel with the plugin — see
+`tools/`, no `CLAUDE.md`.** RepoGuards' rules do not travel with the plugin — see
 [two routes to global](#two-routes-to-global).
 
 ### The directory name is the SHA
 
-It is grove's commit **at the moment of installation**. Since `plugin.json` declares
+It is RepoGuards' commit **at the moment of installation**. Since `plugin.json` declares
 no `version`, the SHA serves as one. That is why copies of different commits sit side by
 side.
 
@@ -74,7 +74,7 @@ descriptions, not 40 documents. `claude plugin details <name>` shows the estimat
 
 ## Two routes to global
 
-Grove has **two** things that load in every session in every repo, by two entirely
+RepoGuards has **two** things that load in every session in every repo, by two entirely
 different mechanisms:
 
 | | The skills | The rules |
@@ -104,10 +104,10 @@ middle.
 
 | Action | Affects the copy? |
 |---|---|
-| `claude plugin update grove@grove` | **yes, if the SHA moved.** If it is identical — a no-op |
+| `claude plugin update repo-guards@repo-guards` | **yes, if the SHA moved.** If it is identical — a no-op |
 | `uninstall` then `install` | yes, always — the only way that works when the SHA has not moved |
 | `claude plugin install` / `/plugin` | yes — a first installation |
-| `claude plugin marketplace update grove` | **no** — it refreshes the catalogue only |
+| `claude plugin marketplace update RepoGuards` | **no** — it refreshes the catalogue only |
 | editing a skill here | no |
 | a commit · `git pull` | no |
 | opening a new session | no |
@@ -164,7 +164,7 @@ SHAs, one comparison.
 
 They must be kept apart, because they do not answer the same question.
 
-### A. Detect — [`warn_stale_plugin_cache.py`](grove/hooks/scripts/warn_stale_plugin_cache.py)
+### A. Detect — [`warn_stale_plugin_cache.py`](repo-guards/hooks/scripts/warn_stale_plugin_cache.py)
 
 ***This is a detector, not a solution*** — the copy still goes stale, and you still run the
 command and reopen a session by hand. What changes is that you know. The previous gap lived
@@ -193,7 +193,7 @@ itself, so without a latch the hook would shout every turn forever. It latches o
 of findings** per session and speaks only when that set **changes**.
 
 **Scope.** Registered like any hook, so it runs at the end of every turn in every repo; its
-first lines read `cwd` from the payload and exit if this is not grove. The gap is
+first lines read `cwd` from the payload and exit if this is not RepoGuards. The gap is
 created here, so the message is said here.
 
 **It does not repair.** A hook that silently changes installation state performs a deploy
@@ -205,7 +205,7 @@ is not JSON — all silent, exit 0. The first version **failed this**: a malform
 caught it, and the fix is that the reader returns `None` on unreadable input — *unknown* is
 distinguished from *absent*.
 
-**The pipeline:** [`tests/test_warn_stale_plugin_cache.py`](grove/hooks/scripts/tests/test_warn_stale_plugin_cache.py)
+**The pipeline:** [`tests/test_warn_stale_plugin_cache.py`](repo-guards/hooks/scripts/tests/test_warn_stale_plugin_cache.py)
 — 27 checks, run against throwaway trees only.
 
 ### B. Abolish the copy — `skills-dir`
@@ -269,9 +269,9 @@ they opened.
 ## Commands
 
 ```bash
-claude plugin update grove@grove                # one
+claude plugin update repo-guards@repo-guards                # one
 claude plugin list                              # what is installed, and at which version
-claude plugin details grove                     # inventory and token cost
+claude plugin details RepoGuards                     # inventory and token cost
 claude plugin prune                             # clear versions nobody holds
 ```
 

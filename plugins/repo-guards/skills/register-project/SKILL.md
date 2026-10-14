@@ -2,7 +2,7 @@
 name: register-project
 description: >-
   Put a repo on the registry so its tracks load — or record that it is
-  deliberately left off. Use when a session opens in a repo grove does not
+  deliberately left off. Use when a session opens in a repo RepoGuards does not
   know, when the user says "register this repo", "רשום את הפרויקט", "why aren't the
   skills loading here", "למה אין לי את הסקילים", when a store or release skill is
   missing in a repo that plainly needs it, or when a repo should be excluded so the
@@ -11,7 +11,7 @@ description: >-
   commits each in its own repo. Run it from the repo being registered.
 ---
 
-# Register a project with grove
+# Register a project with RepoGuards
 
 ## Why this skill exists at all
 
@@ -22,7 +22,7 @@ That is what stops sixteen Apple skills from loading in a website repo.
 It also creates one failure, and this skill is the whole answer to it. **A repo
 nobody registered loads nothing** — silently. Nothing errors; the skill you
 expected is simply not in the list, and the session does the work the long way
-without ever saying a track was missing. Grove's README names that exact
+without ever saying a track was missing. RepoGuards' README names that exact
 shape as the dangerous one: *the file never stops you; the missing skill does, and
 quietly.*
 
@@ -33,8 +33,8 @@ silence loud exactly once, at the moment it can be fixed.
 
 **Run from inside the repo being registered.** You need to read its files to know
 what it is, and its `.claude/settings.json` is what you write. The registry lives
-in grove (`$GROVE/tools/registry.json`) and is reached by
-path — grove declares no claim over it in its own `.claude/owns.json`, and undeclared
+in RepoGuards (`$REPO_GUARDS/tools/registry.json`) and is reached by
+path — RepoGuards declares no claim over it in its own `.claude/owns.json`, and undeclared
 is open, which is precisely why writing it from here is allowed.
 
 If the user asks you to register some *other* repo, move the session there
@@ -77,7 +77,7 @@ one was a bug until 2026-09-09:
 
 ## 2. Decide what it is — against the files
 
-Grove's rule is that a placement decision is made against the contents, not
+RepoGuards' rule is that a placement decision is made against the contents, not
 the title. `add-app-to-site` sounded like a thin bridge and turned out to be the
 deepest worker in the site; `frontend-design` sounded like a site skill and was
 entirely generic. A repo's name is the same kind of evidence: suggestive, not
@@ -143,9 +143,9 @@ Show the user the kind you concluded, the evidence, and the tracks that follow,
 and let them cut or add. Three answers are all legitimate:
 
 - **register with tracks** — the normal case.
-- **register with `tracks: []`** — the repo is known to grove (the Stop
+- **register with `tracks: []`** — the repo is known to RepoGuards (the Stop
   guard reports uncommitted work in registry repos) but loads no tracks. This is
-  what grove itself carries.
+  what RepoGuards itself carries.
 - **ignore** — add it to `ignored` with a one-line reason. That is the answer for
   a clone, a scratch repo, or anything not yours. Say plainly that this is what
   stops the offer returning; an offer that keeps coming back after being declined
@@ -156,14 +156,14 @@ and let them cut or add. Three answers are all legitimate:
 In `tools/registry.json`:
 
 - **anything** goes under `projects` with `root`, `role` and `tracks`. That is the
-  whole of what grove reads, and it is the right answer unless the line below applies;
+  whole of what RepoGuards reads, and it is the right answer unless the line below applies;
 - an **app** goes under `apps` instead — but only in a tree that already has that
-  section, because it belongs to the marketplace that ships apps rather than to grove.
+  section, because it belongs to the marketplace that ships apps rather than to RepoGuards.
   There it carries `repo`, `tracks`, and whatever identifiers that marketplace reads
   (`hub_slug`, `platforms`). Follow the entries already there; do not invent the shape;
 - an **ignored** repo goes under `ignored` with `root` and why.
 
-**Read `_extensions` at the top of the registry before writing an entry.** Grove reads
+**Read `_extensions` at the top of the registry before writing an entry.** RepoGuards reads
 `projects`, `ignored` and `keys_root`; every other section is somebody else's, and a
 registration that invents keys nobody reads looks exactly like one that works.
 
@@ -179,17 +179,17 @@ re-derive one from the other.
 
 ## 5. Generate the settings and verify
 
-From grove:
+From RepoGuards:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/grove.py sync_project_settings --check
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/grove.py sync_project_settings
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/repo_guards.py sync_project_settings --check
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/repo_guards.py sync_project_settings
 ```
 
-(`python3 $GROVE/tools/sync_project_settings.py` is the same command, once `$GROVE`
+(`python3 $REPO_GUARDS/tools/sync_project_settings.py` is the same command, once `$REPO_GUARDS`
 exists — it is written by the first deploy, and the form above needs no variable.)
 
-The script owns only the `grove@grove` keys inside `enabledPlugins` and
+The script owns only the `repo-guards@repo-guards` keys inside `enabledPlugins` and
 leaves everything else in those files alone. Run `--check` first and read it: it
 is also how you diagnose a registered repo whose tracks are not loading.
 
@@ -197,7 +197,7 @@ is also how you diagnose a registered repo whose tracks are not loading.
 
 This change lands in two repos, so it is two commits, never one:
 
-1. **grove** — the registry entry. Message in grove's terms: a project
+1. **RepoGuards** — the registry entry. Message in RepoGuards' terms: a project
    was registered and which tracks it draws.
 2. **the repo itself** — its `.claude/settings.json`. Message in that repo's terms:
    it declares which tracks it loads.

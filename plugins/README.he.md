@@ -2,7 +2,7 @@
 
 # הפלאגינים — איך הם מגיעים לכל ריפו
 
-**מה התיקייה הזו.** חמשת הטראקים שgrove מפיץ כפלאגינים. הסקילים כאן נטענים בכל
+**מה התיקייה הזו.** חמשת הטראקים שRepoGuards מפיץ כפלאגינים. הסקילים כאן נטענים בכל
 סשן על המכונה, בכל תיקייה — וזה בכוונה.
 
 **מה המסמך הזה.** למה זה עובד ככה, איפה בדיוק נשמר מה, ולמה עריכה כאן **לא**
@@ -30,7 +30,7 @@
 
 | תוסף | סקילים | מה |
 |---|---|---|
-| `grove` | 2 | `deploy` ו‑`register-project` — הרישום, והכנסת repo אליו |
+| `RepoGuards` | 2 | `deploy` ו‑`register-project` — הרישום, והכנסת repo אליו |
 
 *נספר מהדיסק 2026-09-11.* תוסף אחד, דלוק ברמת המשתמש, ולכן ההוקים שלו רצים בכל repo.
 כל מה שלמטה הוא על איך תוסף מגיע לסשן בכלל — וזה זהה לששת מסלולי האפליקציות שנשלחים
@@ -45,7 +45,7 @@
 
 **מרקטפלייס** — הקטלוג. `~/.claude/plugins/known_marketplaces.json`.
 
-הרשומה של `grove` היא מסוג `directory` ומצביעה על `$GROVE`
+הרשומה של `RepoGuards` היא מסוג `directory` ומצביעה על `$REPO_GUARDS`
 עצמו. אין העתק: `.claude-plugin/marketplace.json` נקרא מהמקום, חי.
 
 (לשם השוואה — מרקטפלייס ממקור git נשמר כ‑clone תחת `~/.claude/plugins/marketplaces/`.)
@@ -64,11 +64,11 @@
 ```
 
 רק תת־העץ ש‑`source` במניפסט מצביע עליו. **אין `.git`, אין `docs/`, אין `tools/`,
-אין `CLAUDE.md`.** כללי grove אינם נוסעים עם הפלאגין — ראה [שני מסלולים לגלובלי](#שני-מסלולים-לגלובלי).
+אין `CLAUDE.md`.** כללי RepoGuards אינם נוסעים עם הפלאגין — ראה [שני מסלולים לגלובלי](#שני-מסלולים-לגלובלי).
 
 ### שם התיקייה הוא ה‑SHA
 
-`8fb0381ccd6c` הוא הקומיט של grove **ברגע ההתקנה**. כיוון ש‑`plugin.json` אינו
+`8fb0381ccd6c` הוא הקומיט של RepoGuards **ברגע ההתקנה**. כיוון ש‑`plugin.json` אינו
 מכריז `version`, ה‑SHA משמש כגרסה. לכן העתקים של קומיטים שונים יושבים זה לצד זה.
 
 ### `.in_use/` — למה גרסאות ישנות נשארות
@@ -98,7 +98,7 @@
 
 ## שני מסלולים לגלובלי
 
-ל‑grove יש **שני** דברים שנטענים בכל סשן בכל ריפו, ושני מנגנונים שונים לגמרי:
+ל‑RepoGuards יש **שני** דברים שנטענים בכל סשן בכל ריפו, ושני מנגנונים שונים לגמרי:
 
 | | הסקילים | הכללים |
 |---|---|---|
@@ -125,10 +125,10 @@
 
 | פעולה | משפיע על ההעתק? |
 |---|---|
-| `claude plugin update grove@grove` | **כן, אם ה‑SHA זז.** אם הוא זהה — **no‑op**, ראה למטה |
+| `claude plugin update repo-guards@repo-guards` | **כן, אם ה‑SHA זז.** אם הוא זהה — **no‑op**, ראה למטה |
 | `uninstall` ואז `install` | כן, תמיד — הדרך היחידה שעובדת כשה‑SHA לא זז |
 | `claude plugin install` / `/plugin` | כן — התקנה ראשונה |
-| `claude plugin marketplace update grove` | **לא** — מרענן קטלוג בלבד |
+| `claude plugin marketplace update RepoGuards` | **לא** — מרענן קטלוג בלבד |
 | עריכת סקיל כאן | לא |
 | קומיט · `git pull` | לא |
 | פתיחת סשן חדש | לא |
@@ -196,7 +196,7 @@ apply", ו‑`.in_use` רושם `procStart`. סשן שרץ נעול על ההע�
 
 חשוב להפריד ביניהן, כי הן לא עונות על אותה שאלה.
 
-### א. לגלות — [`warn_stale_plugin_cache.py`](grove/hooks/scripts/warn_stale_plugin_cache.py)
+### א. לגלות — [`warn_stale_plugin_cache.py`](repo-guards/hooks/scripts/warn_stale_plugin_cache.py)
 
 *נבנה 2026-09-09. **זה גלאי, לא פתרון** — ההעתק עדיין מתיישן, ואתה עדיין מריץ את
 הפקודה ופותח סשן מחדש ביד. מה שמשתנה הוא שאתה יודע. הפער הקודם חי יומיים בשקט.*
@@ -225,7 +225,7 @@ hook מסוג `Stop`. **הוא משווה תוכן, לא SHA** — 139 קבצי�
 כשהיא **משתנה**. ממצא נוסף שובר את המנעול; אותו ממצא שוב — שקט.
 
 **היקף.** רשום ב‑`~/.claude/settings.json` כמו כל hook, ולכן רץ בסוף כל תור בכל
-ריפו; השורות הראשונות קוראות `cwd` מה‑payload ויוצאות אם זה לא grove. במקום אחר
+ריפו; השורות הראשונות קוראות `cwd` מה‑payload ויוצאות אם זה לא RepoGuards. במקום אחר
 המחיר הוא תהליך פייתון שיוצא מיד. הפער נוצר כאן, ולכן ההודעה נאמרת כאן.
 
 **הוא לא מתקן.** hook שמשנה מצב התקנה בשקט עושה deploy שאיש לא ביקש, ועדיין דורש
@@ -236,7 +236,7 @@ restart כדי שיהיה לזה ערך.
 שכל חמשת הטראקים אינם מותקנים. הצינור תפס את זה, והתיקון הוא ש‑`installs()` מחזיר
 `None` על קלט לא קריא — *לא ידוע* מובחן מ*לא קיים*.
 
-**הצינור:** [`tests/test_warn_stale_plugin_cache.py`](grove/hooks/scripts/tests/test_warn_stale_plugin_cache.py)
+**הצינור:** [`tests/test_warn_stale_plugin_cache.py`](repo-guards/hooks/scripts/tests/test_warn_stale_plugin_cache.py)
 — 27 בדיקות, מריץ על עצי דמה בלבד. `tools/verify_guards.py` מריץ אותו לפני כל קומיט של מעקה.
 
 ### ב. לבטל את ההעתק — `skills-dir`
@@ -299,9 +299,9 @@ symlink מבטל את ההפרדה, ו**עץ העבודה הופך לפרודק�
 ## פקודות
 
 ```bash
-claude plugin update grove@grove             # אחד
+claude plugin update repo-guards@repo-guards             # אחד
 claude plugin list                              # מה מותקן ובאיזו גרסה
-claude plugin details grove                     # מלאי ועלות טוקנים
+claude plugin details RepoGuards                     # מלאי ועלות טוקנים
 claude plugin prune                             # ניקוי גרסאות שאיש לא מחזיק
 ```
 
@@ -309,7 +309,7 @@ claude plugin prune                             # ניקוי גרסאות שאי
 
 ```bash
 for p in apple-track android-track capacitor-track shared-track design-track; do
-  claude plugin update $p@grove
+  claude plugin update $p@repo-guards
 done
 ```
 

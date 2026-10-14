@@ -1,6 +1,6 @@
 *[English](CLAUDE.md) · עברית*
 
-# כללי grove
+# כללי RepoGuards
 
 נטען **בנוסף** ל‑`~/.claude/CLAUDE.md` (שהוא קישור ל‑`rules/global-CLAUDE.md` כאן),
 לא במקומו. הכללים הגלובליים חלים גם כאן; מה שלמטה מוסיף עליהם ואינו סותר אותם.
@@ -40,7 +40,7 @@ python3 tools/deploy.py
 
 הוא מסנכרן את קבצי ההגדרות מהרישום, מרענן את העותקים המותקנים, ומאמת. `--check`
 עונה על "הכול במקום?" בלי לשנות דבר. הפקודה המקבילה בסשן היא
-`/grove:deploy`.
+`/repo-guards:deploy`.
 
 **קומטים לפני שפורסים.** `claude plugin update` מעתיק את **עץ העבודה** ומתייג
 אותו ב‑HEAD, ולכן פריסה של עבודה לא מקומטת שמה במטמון בייטים שאינם באף קומיט —
@@ -121,9 +121,9 @@ python3 tools/check_references.py
 
 `warn_ownership_drift` שואל אותן **בסוף כל תור, על המקום שאתה עומד בו** — שם נוצר
 החור ושם יודעים למה. `tools/check_ownership.py` שואל אותן **על כל המקומות, בתוך
-`deploy.py`**. שניהם קוראים `grove_repo.ownership_gaps`, כי בודק שעונה אחרת לפי מי
+`deploy.py`**. שניהם קוראים `guards_repo.ownership_gaps`, כי בודק שעונה אחרת לפי מי
 ששאל גרוע מכלום. וה‑Stop מדבר רק כשמשהו **השתנה** — פער שכבר נאמר שותק.
 
-`plugins/grove/hooks/scripts/honor_ownership.py` **חייב להיכשל‑פתוח.**
+`plugins/repo-guards/hooks/scripts/honor_ownership.py` **חייב להיכשל‑פתוח.**
 כל שינוי בו נבדק בצינור על כל הענפים לפני שהוא נכנס לתוקף — `tools/verify_guards.py` — מעקה שחוסם בטעות עוצר עבודה, ומעקה
 שקורס עוצר הכל.

@@ -43,19 +43,19 @@ will never be recalled while working on A. This cannot be repaired afterwards, w
 makes it a consideration in choosing where the session stands rather than a footnote.
 
 The full account — what is protected, who owns what, and when to move a session — is in
-`$GROVE/README.md`.
+`$REPO_GUARDS/README.md`.
 
 ## Anchors — why it says `$SITE` and not a path
 
-**No skill names the path of any particular machine.** `$SITE/content`, `$GROVE`,
+**No skill names the path of any particular machine.** `$SITE/content`, `$REPO_GUARDS`,
 `$KEYS_ROOT`, and every registry entry by its own name — these are **real environment
 variables**, written into
 `~/.claude/settings.json` from the registry by every
-`python3 $GROVE/tools/deploy.py`. On a command line they expand by themselves; to
-see them all: `env | grep -E "DEV_ROOT|GROVE|KEYS_|SITE"`.
+`python3 $REPO_GUARDS/tools/deploy.py`. On a command line they expand by themselves; to
+see them all: `env | grep -E "DEV_ROOT|REPO_GUARDS|KEYS_|SITE"`.
 
 **The registry says how the tree is shaped, the machine says where it sits.** A root is
-written relative (`<data-repo>`, `web/<site>`), and the base is derived from where grove
+written relative (`<data-repo>`, `web/<site>`), and the base is derived from where RepoGuards
 itself sits. The same registry therefore works on a second machine without
 changing a word — which is why writing a machine path such as `~/Developer/…` into a
 skill is a regression, and `tools/tests/test_portability.py` fails on it.

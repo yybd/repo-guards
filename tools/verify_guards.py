@@ -2,11 +2,11 @@
 """Check the guards: their pipelines, the copy that is actually running, and leftovers.
 
 The guards used to be registered by hand into ~/.claude/settings.json, and install.py
-was the gate: it refused to register a hook whose pipeline failed, because grove
+was the gate: it refused to register a hook whose pipeline failed, because RepoGuards
 rule is that a guard is run across all its branches before it takes effect, and
 installing WAS the moment it took effect.
 
-They ship with grove now, so there is no install step left to gate — the
+They ship with RepoGuards now, so there is no install step left to gate — the
 moment they take effect is `claude plugin install/update`, which this repo does not
 own. The gate has to move to where the change is made instead of where it lands, and
 this is it. Run it before committing a guard.
@@ -32,19 +32,19 @@ those, and touches nothing else in the file.
 import argparse, glob, json, os, shutil, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-GROVE = os.path.dirname(HERE)
-GROVE_SCRIPTS = os.path.join(GROVE, "plugins", "grove", "hooks", "scripts")
-# The repo under test. Grove by default; another marketplace's checkout when it is asked
+REPO_GUARDS = os.path.dirname(HERE)
+GUARDS_SCRIPTS = os.path.join(REPO_GUARDS, "plugins", "repo-guards", "hooks", "scripts")
+# The repo under test. RepoGuards by default; another marketplace's checkout when it is asked
 # to verify its own copies — the byte-for-byte comparison below is the same question for
 # everyone who ships plugins, and copying it per repo is how two answers drift apart.
-REPO = os.environ.get("GROVE_REPO") or GROVE
-PLUGIN = os.environ.get("GROVE_PLUGIN") or os.path.join(REPO, "plugins", "grove")
+REPO = (os.environ.get("REPO_GUARDS_REPO") or os.environ.get("GROVE_REPO")) or REPO_GUARDS
+PLUGIN = os.environ.get("REPO_GUARDS_PLUGIN") or os.path.join(REPO, "plugins", "repo-guards")
 SCRIPTS = os.path.join(PLUGIN, "hooks", "scripts")
 TESTS = os.path.join(SCRIPTS, "tests")
-SETTINGS = os.environ.get("GROVE_SETTINGS") or os.path.expanduser("~/.claude/settings.json")
-INSTALLED = os.environ.get("GROVE_INSTALLED") or os.path.expanduser(
+SETTINGS = os.environ.get("REPO_GUARDS_SETTINGS") or os.path.expanduser("~/.claude/settings.json")
+INSTALLED = os.environ.get("REPO_GUARDS_INSTALLED") or os.path.expanduser(
     "~/.claude/plugins/installed_plugins.json")
-PLUGIN_ID = os.environ.get("GROVE_PLUGIN_ID") or "grove@grove"
+PLUGIN_ID = os.environ.get("REPO_GUARDS_PLUGIN_ID") or "repo-guards@repo-guards"
 LEGACY_MARK = "tools/hooks/"
 
 
@@ -55,7 +55,7 @@ def pretty(p):
 
 def guards():
     return sorted(f for f in os.listdir(SCRIPTS)
-                  if f.endswith(".py") and f != "grove_repo.py")
+                  if f.endswith(".py") and f not in ("guards_repo.py", "grove_repo.py"))   # the shim, until 0.3.0
 
 
 def declared():
@@ -96,7 +96,7 @@ def cache_findings():
     content from no commit cannot be repaired by `update` at all — it needs a
     reinstall, which only a content comparison can know to say.
     """
-    sys.path.insert(0, GROVE_SCRIPTS)
+    sys.path.insert(0, GUARDS_SCRIPTS)
     try:
         import warn_stale_plugin_cache as stale
         found = stale.findings()
@@ -155,7 +155,7 @@ def copies_only():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Verify grove's guards.")
+    ap = argparse.ArgumentParser(description="Verify RepoGuards' guards.")
     ap.add_argument("--clean", action="store_true",
                     help="remove legacy tools/hooks/ entries from settings.json")
     a = ap.parse_args()
@@ -165,7 +165,7 @@ def main():
 
     if not os.path.isdir(SCRIPTS):
         # A repo that ships plugins but no guards — another marketplace asking the one
-        # question that is not grove-specific: do the installed copies still match?
+        # question that is not repo-guards-specific: do the installed copies still match?
         return copies_only()
 
     names, err = declared()
@@ -194,7 +194,7 @@ def main():
         bad += 0 if ok else 1
     # And every other pipeline sitting beside them. Not all of them are named after a
     # guard: what the two guards stand on — reading a shell line — is one function in
-    # grove_repo, and a test named after it would have been run by nothing here. That is
+    # guards_repo, and a test named after it would have been run by nothing here. That is
     # the lesson deploy.py already learned about its own tests directory, arriving in the
     # second one: a suite that is only partly run is a suite that rots.
     for path in sorted(glob.glob(os.path.join(TESTS, "test_*.py"))):

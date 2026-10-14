@@ -9,8 +9,8 @@ cannot report it. It must fail open, so "not declared" and "forgot to declare" a
 same thing to it, and any rule added there would cost on every tool call.
 
 `tools/check_ownership.py` already asks this across every registered place — but only
-inside `deploy.py`, which is a GROVE action. The hole is created somewhere else: you
-add a skill to a project, and nothing in that project ever runs grove's deploy. The
+inside `deploy.py`, which is a REPO_GUARDS action. The hole is created somewhere else: you
+add a skill to a project, and nothing in that project ever runs RepoGuards' deploy. The
 detector could lag for weeks.
 
 So this asks the same question at the other end: **about the place the session is
@@ -28,10 +28,10 @@ Fails silent: any error reports nothing. A hook that crashes at the end of every
 worse than no hook.
 """
 import json, os, sys, time
-from grove_repo import registry_path, registry_roots, ownership_gaps
+from guards_repo import registry_path, registry_roots, ownership_gaps
 
-STATE_DIR = os.environ.get("GROVE_OWNS_STATE") or os.path.expanduser(
-    "~/.claude/.grove/owns-state")
+STATE_DIR = os.environ.get("REPO_GUARDS_OWNS_STATE") or os.path.expanduser(
+    "~/.claude/.repo-guards/owns-state")
 
 
 def real(p):

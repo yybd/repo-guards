@@ -11,13 +11,13 @@ import json, os, shutil, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-# The judgement lives in grove_repo, shared with the Stop hook — this file used to
+# The judgement lives in guards_repo, shared with the Stop hook — this file used to
 # call check_ownership.check(), which stopped existing when the two were unified, and
 # nothing noticed because nothing ran it. Both halves of that are fixed: the import
 # follows the logic, and deploy.py now runs every test in this directory.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)),
-                                "plugins", "grove", "hooks", "scripts"))
-import grove_repo as co                                  # noqa: E402
+                                "plugins", "repo-guards", "hooks", "scripts"))
+import guards_repo as co                                  # noqa: E402
 
 
 def main():

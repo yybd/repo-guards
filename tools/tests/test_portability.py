@@ -3,7 +3,7 @@
     python3 tools/tests/test_portability.py
 
 The question is not rhetorical and it is not answerable by reading. It is answered by
-building a second machine — a tree under a different base, with grove in it and
+building a second machine — a tree under a different base, with RepoGuards in it and
 the other repos beside it — and asking the real code where things are.
 
 What "portable" means here, precisely: **the registry says how the tree is SHAPED, and
@@ -18,13 +18,13 @@ import json, os, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-SCRIPTS = os.path.join(REPO, "plugins", "grove", "hooks", "scripts")
+SCRIPTS = os.path.join(REPO, "plugins", "repo-guards", "hooks", "scripts")
 sys.path.insert(0, SCRIPTS)
-import grove_repo as fr                                    # noqa: E402
+import guards_repo as fr                                    # noqa: E402
 
 
 def main():
-    base = os.path.realpath(tempfile.mkdtemp(prefix="grove-machine2-"))
+    base = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-machine2-"))
     fails = 0
 
     def check(ok, label, detail=""):
@@ -73,10 +73,10 @@ def main():
         check(not absolute, "no root is an absolute path",
               ", ".join(f"{n}={v}" for n, v in absolute))
 
-        # --- build the second machine: grove, and the other repos beside it ---
+        # --- build the second machine: RepoGuards, and the other repos beside it ---
         print("\n-- a second machine --")
         m2 = os.path.join(base, "dev")
-        f2 = os.path.join(m2, "grove")
+        f2 = os.path.join(m2, "repo-guards")
         os.makedirs(os.path.join(f2, ".claude-plugin"), exist_ok=True)
         os.makedirs(os.path.join(f2, "tools"), exist_ok=True)
         shutil.copy(os.path.join(REPO, ".claude-plugin", "marketplace.json"),
@@ -88,15 +88,15 @@ def main():
         for _name, rel in written:
             os.makedirs(os.path.join(m2, rel), exist_ok=True)
 
-        env = dict(os.environ, GROVE_ROOT=f2)
-        # Both overrides have to go, not just one: a GROVE_REGISTRY in the caller's
+        env = dict(os.environ, REPO_GUARDS_ROOT=f2)
+        # Both overrides have to go, not just one: a REPO_GUARDS_REGISTRY in the caller's
         # environment would make the second machine read THIS machine's registry, and the
         # test would report zero roots found while nothing was wrong. It only shows up for
         # someone whose registry is empty — which is exactly the mechanics-only user.
-        env.pop("GROVE_DEV_ROOT", None)
-        env.pop("GROVE_REGISTRY", None)
+        env.pop("REPO_GUARDS_DEV_ROOT", None)
+        env.pop("REPO_GUARDS_REGISTRY", None)
         code = (
-            "import json,os,sys;sys.path.insert(0,%r);import grove_repo as fr;"
+            "import json,os,sys;sys.path.insert(0,%r);import guards_repo as fr;"
             "reg=json.load(open(fr.registry_path()));"
             "print(json.dumps({'base':fr.dev_base(),"
             "'roots':{n:r for n,r,_ in fr.registry_roots(reg)}}))" % SCRIPTS
@@ -108,7 +108,7 @@ def main():
             return 1
         got = json.loads(p.stdout)
 
-        check(got["base"] == m2, "the base is derived from where grove sits, with no configuration", got["base"])
+        check(got["base"] == m2, "the base is derived from where RepoGuards sits, with no configuration", got["base"])
         check(len(got["roots"]) == len(written), f"all {len(written)} roots were found",
               str(len(got["roots"])))
         strays = {n: r for n, r in got["roots"].items() if not r.startswith(m2 + os.sep)}
@@ -160,28 +160,28 @@ def main():
               "~ resolves to home, not to the base")
         p2 = subprocess.run(
             [sys.executable, "-c",
-             "import sys;sys.path.insert(0,%r);import grove_repo as fr;print(fr.dev_base())" % SCRIPTS],
+             "import sys;sys.path.insert(0,%r);import guards_repo as fr;print(fr.dev_base())" % SCRIPTS],
             capture_output=True, text=True, timeout=30,
-            env=dict(os.environ, GROVE_DEV_ROOT=m2))
-        check(p2.stdout.strip() == m2, "GROVE_DEV_ROOT overrides the derivation", p2.stdout.strip())
+            env=dict(os.environ, REPO_GUARDS_DEV_ROOT=m2))
+        check(p2.stdout.strip() == m2, "REPO_GUARDS_DEV_ROOT overrides the derivation", p2.stdout.strip())
 
-        # --- a base the registry NAMES, for a tree grove does not sit inside ---
-        # The derivation assumes grove is one of the repos in the tree. That is true for
+        # --- a base the registry NAMES, for a tree RepoGuards does not sit inside ---
+        # The derivation assumes RepoGuards is one of the repos in the tree. That is true for
         # whoever built it here and false for anyone who adds it as a marketplace from
-        # elsewhere — their roots would resolve beside grove instead of beside their work.
+        # elsewhere — their roots would resolve beside RepoGuards instead of beside their work.
         print("\n-- a base that is declared rather than derived --")
-        elsewhere = os.path.realpath(tempfile.mkdtemp(prefix="grove-elsewhere-"))
+        elsewhere = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-elsewhere-"))
         os.makedirs(os.path.join(elsewhere, "sub", "repo"), exist_ok=True)
 
         def ask(reg_body, expr="fr.dev_base()"):
             path = os.path.join(base, "declared-base.json")
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(reg_body, f)
-            env = {k: v for k, v in os.environ.items() if k != "GROVE_DEV_ROOT"}
-            env["GROVE_REGISTRY"] = path
+            env = {k: v for k, v in os.environ.items() if k != "REPO_GUARDS_DEV_ROOT"}
+            env["REPO_GUARDS_REGISTRY"] = path
             r = subprocess.run(
                 [sys.executable, "-c",
-                 "import sys;sys.path.insert(0,%r);import grove_repo as fr;print(%s)"
+                 "import sys;sys.path.insert(0,%r);import guards_repo as fr;print(%s)"
                  % (SCRIPTS, expr)],
                 capture_output=True, text=True, timeout=30, env=env)
             return r.stdout.strip()

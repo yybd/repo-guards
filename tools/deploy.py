@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Put what this repo holds onto the machine, in the order that actually works.
 
-Editing grove changes nothing by itself. A skill, a guard and a hooks.json all
+Editing RepoGuards changes nothing by itself. A skill, a guard and a hooks.json all
 live in a plugin, and a plugin is a COPY in ~/.claude/plugins/cache — so between "I
 committed it" and "it is running" there are two steps that nothing performs for you,
 and one of them is opening a new session. That gap has already produced the exact
@@ -39,8 +39,8 @@ import argparse, glob, json, os, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-SCRIPTS = os.path.join(REPO, "plugins", "grove", "hooks", "scripts")
-MARKETPLACE = "grove"
+SCRIPTS = os.path.join(REPO, "plugins", "repo-guards", "hooks", "scripts")
+MARKETPLACE = "repo-guards"
 INSTALLED = os.path.expanduser("~/.claude/plugins/installed_plugins.json")
 CACHE = os.path.expanduser("~/.claude/plugins/cache")
 sys.path.insert(0, SCRIPTS)
@@ -101,7 +101,7 @@ def prune_cache(check):
     Every deploy writes a new <sha> directory beside the old ones and nothing ever
     removes them: seven tracks had accumulated 41 copies, 34 of them dead, before
     anyone noticed. Only the version named in installed_plugins.json is live, and
-    only grove's tree is touched — another marketplace's cache is not ours.
+    only RepoGuards' tree is touched — another marketplace's cache is not ours.
     """
     if not os.path.exists(INSTALLED):
         # A machine that has never installed a plugin has no registry and no cache, and
@@ -136,7 +136,7 @@ def prune_cache(check):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Deploy grove onto this machine.")
+    ap = argparse.ArgumentParser(description="Deploy RepoGuards onto this machine.")
     ap.add_argument("--check", action="store_true", help="report only, change nothing")
     ap.add_argument("--dirty", action="store_true",
                     help="deploy uncommitted plugin changes anyway (see the module docstring)")
@@ -144,7 +144,7 @@ def main():
     problems = 0
 
     # A fresh clone has the example and no registry of its own. Copying it is the whole
-    # of "set up grove", and doing it here means nobody has to be told to.
+    # of "set up RepoGuards", and doing it here means nobody has to be told to.
     reg_path = os.path.join(HERE, "registry.json")
     if not os.path.exists(reg_path):
         example = os.path.join(HERE, "registry.example.json")
@@ -159,7 +159,7 @@ def main():
         else:
             shutil.copy(example, reg_path)
             print("   Created tools/registry.json from the template — register projects with "
-                  "/grove:register-project\n")
+                  "/repo-guards:register-project\n")
 
     print("── 1. the registry → the settings files ──")
     rc, out = sh([sys.executable, os.path.join(HERE, "sync_project_settings.py")]

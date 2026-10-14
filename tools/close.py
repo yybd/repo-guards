@@ -39,9 +39,9 @@ import argparse, glob, json, os, subprocess, sys, textwrap, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-PLUGINS = os.environ.get("GROVE_PLUGINS") or os.path.join(REPO, "plugins")
-STATE_DIR = os.environ.get("GROVE_TOUCHED_STATE") or os.path.expanduser(
-    "~/.claude/.grove/touched")
+PLUGINS = (os.environ.get("REPO_GUARDS_PLUGINS") or os.environ.get("GROVE_PLUGINS")) or os.path.join(REPO, "plugins")
+STATE_DIR = os.environ.get("REPO_GUARDS_TOUCHED_STATE") or os.path.expanduser(
+    "~/.claude/.repo-guards/touched")
 
 
 def git(root, *args, timeout=10, raw=False):
@@ -60,7 +60,7 @@ def git(root, *args, timeout=10, raw=False):
         return False, ""
 
 
-INSTALLED = os.environ.get("GROVE_PLUGIN_CACHE") or os.path.expanduser(
+INSTALLED = os.environ.get("REPO_GUARDS_PLUGIN_CACHE") or os.path.expanduser(
     "~/.claude/plugins/cache")
 
 
@@ -69,7 +69,7 @@ def declaration_files():
 
     A declaring skill need not live here. Once the shipping tracks are their own
     marketplace, the operations that land in eight places are declared in a plugin
-    grove never sees the source of — and reading only `plugins/` here would report
+    RepoGuards never sees the source of — and reading only `plugins/` here would report
     "no operation declares its places" while a dozen do. So the installed caches are
     read too, and this repo is read last so that a skill you are editing wins over the
     copy that was installed from it.

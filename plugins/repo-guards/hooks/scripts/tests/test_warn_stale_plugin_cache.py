@@ -51,7 +51,7 @@ def run(env, sid="s1", cwd=None, active=False):
 
 
 def main():
-    base = tempfile.mkdtemp(prefix="grove-stale-test-")
+    base = tempfile.mkdtemp(prefix="repo-guards-stale-test-")
     fails = 0
 
     def check(ok, label, detail=""):
@@ -66,7 +66,7 @@ def main():
         git(repo, "init", "-q")
         git(repo, "config", "user.email", "t@t"); git(repo, "config", "user.name", "t")
         write(os.path.join(repo, ".claude-plugin", "marketplace.json"), json.dumps({
-            "name": "grove", "plugins": [
+            "name": "repo-guards", "plugins": [
                 {"name": "alpha", "source": "./plugins/alpha"},
                 {"name": "beta", "source": "./plugins/beta"}]}))
         make_track(os.path.join(repo, "plugins", "alpha"), "alpha", {"a1": "one\n"})
@@ -93,12 +93,12 @@ def main():
 
         def registry(entries):
             json.dump({"version": 2, "plugins": {
-                f"{n}@grove": [{"scope": "user", "installPath": p, "version": v}]
+                f"{n}@repo-guards": [{"scope": "user", "installPath": p, "version": v}]
                 for n, (p, v) in entries.items()}}, open(installed, "w"))
 
-        env = dict(os.environ, GROVE_REPO=repo, GROVE_INSTALLED_PLUGINS=installed,
-                   GROVE_USER_CLAUDE_MD=link, GROVE_STALE_STATE=state,
-                   GROVE_MARKETPLACE="grove")
+        env = dict(os.environ, REPO_GUARDS_REPO=repo, REPO_GUARDS_INSTALLED_PLUGINS=installed,
+                   REPO_GUARDS_USER_CLAUDE_MD=link, REPO_GUARDS_STALE_STATE=state,
+                   REPO_GUARDS_MARKETPLACE="repo-guards")
 
         a = install("alpha"); b = install("beta")
         registry({"alpha": (a, HEAD[:12]), "beta": (b, HEAD[:12])})
@@ -196,9 +196,9 @@ def main():
         os.makedirs(outside)
         write(os.path.join(repo, "plugins", "alpha", "skills", "a3", "SKILL.md"), "three\n")
         msg, _ = run(env, sid="s11", cwd=outside)
-        check(msg == "", "cwd outside grove → silent despite a real gap", msg[:120])
+        check(msg == "", "cwd outside RepoGuards → silent despite a real gap", msg[:120])
         msg, _ = run(env, sid="s11", cwd=os.path.join(repo, "plugins", "alpha"))
-        check("alpha" in msg, "cwd in a subdirectory of grove → speaks", msg[:120])
+        check("alpha" in msg, "cwd in a subdirectory of RepoGuards → speaks", msg[:120])
 
         msg, _ = run(env, sid="s12")
         check(msg == "", "no cwd → silent", msg[:120])
@@ -216,7 +216,7 @@ def main():
         check(msg == "", "malformed marketplace.json → silent, not a crash", err or msg[:120])
 
         write(os.path.join(repo, ".claude-plugin", "marketplace.json"), json.dumps({
-            "name": "grove", "plugins": [
+            "name": "repo-guards", "plugins": [
                 {"name": "alpha", "source": "./plugins/alpha"},
                 {"name": "beta", "source": "./plugins/beta"}]}))
         os.remove(installed)
@@ -234,9 +234,9 @@ def main():
         msg, err = run(env, sid="s16b", cwd=repo)
         check(msg == "", "an unexpected registration shape → silent", err or msg[:120])
 
-        env_noenv = dict(os.environ, GROVE_REPO=os.path.join(base, "nope"),
-                         GROVE_INSTALLED_PLUGINS=installed, GROVE_USER_CLAUDE_MD=link,
-                         GROVE_STALE_STATE=state)
+        env_noenv = dict(os.environ, REPO_GUARDS_REPO=os.path.join(base, "nope"),
+                         REPO_GUARDS_INSTALLED_PLUGINS=installed, REPO_GUARDS_USER_CLAUDE_MD=link,
+                         REPO_GUARDS_STALE_STATE=state)
         msg, err = run(env_noenv, sid="s17", cwd=repo)
         check(msg == "", "a REPO that does not exist → silent", err or msg[:120])
 

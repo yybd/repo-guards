@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Find grove repo from a guard that is running out of the plugin cache.
+"""Find RepoGuards repo from a guard that is running out of the plugin cache.
 
 The guards used to sit in the repo and find the registry two directories up. They
-ship with grove now, and a plugin is COPIED into
-`~/.claude/plugins/cache/grove/grove/<sha>/` at install time — so
+ship with RepoGuards now, and a plugin is COPIED into
+`~/.claude/plugins/cache/repo-guards/repo-guards/<sha>/` at install time — so
 `../registry.json` from a guard's own location no longer points at anything.
 
 The registry is not shippable either. It is live data: it changes every time a repo
@@ -13,8 +13,8 @@ and this is the bridge.
 
 Three ways to find the repo, in order, each one right for a different caller:
 
-1. `GROVE_ROOT` — the pipelines set it, so a test never depends on where this
-   machine happens to keep grove.
+1. `REPO_GUARDS_ROOT` — the pipelines set it, so a test never depends on where this
+   machine happens to keep RepoGuards.
 2. Walking up from this file — true when a guard runs from the repo itself, which
    is how every pipeline and every hand-run invocation works.
 3. `known_marketplaces.json` — where Claude Code recorded the marketplace's own
@@ -27,27 +27,27 @@ factory" has to mean silence, not a traceback at the start of every session.
 """
 import json, os, re, shlex
 
-MARKETPLACE = "grove"
+MARKETPLACE = "repo-guards"
 
 
-def _looks_like_grove(path):
+def _looks_like_repo_guards(path):
     # registry.json is MACHINE data and is not in the repo — a fresh clone has only the
-    # example. Recognising grove must not depend on having been set up yet, or the
+    # example. Recognising RepoGuards must not depend on having been set up yet, or the
     # very first `deploy.py` would be unable to find the thing it is standing in.
     return (os.path.isfile(os.path.join(path, ".claude-plugin", "marketplace.json"))
             and (os.path.isfile(os.path.join(path, "tools", "registry.json"))
                  or os.path.isfile(os.path.join(path, "tools", "registry.example.json"))))
 
 
-def grove_root():
-    env = os.environ.get("GROVE_ROOT")
+def guards_root():
+    env = (os.environ.get("REPO_GUARDS_ROOT") or os.environ.get("GROVE_ROOT"))
     if env:
         p = os.path.realpath(os.path.expanduser(env))
         return p if os.path.isdir(p) else None
 
     here = os.path.dirname(os.path.abspath(__file__))
     while True:
-        if _looks_like_grove(here):
+        if _looks_like_repo_guards(here):
             return here
         parent = os.path.dirname(here)
         if parent == here:
@@ -58,7 +58,7 @@ def grove_root():
         known = os.path.expanduser("~/.claude/plugins/known_marketplaces.json")
         loc = json.load(open(known, encoding="utf-8"))[MARKETPLACE]["installLocation"]
         loc = os.path.realpath(os.path.expanduser(loc))
-        return loc if _looks_like_grove(loc) else None
+        return loc if _looks_like_repo_guards(loc) else None
     except Exception:
         return None
 
@@ -74,18 +74,18 @@ def dev_base():
     Three answers, in this order, and the middle one is why this is not just a
     derivation any more:
 
-    1. `GROVE_DEV_ROOT` — one session, one tree, decided from outside.
+    1. `REPO_GUARDS_DEV_ROOT` — one session, one tree, decided from outside.
     2. `base` in the registry — **the answer for an installation that did not clone
-       grove beside its repos.** The derivation below assumes grove is one of the repos
+       RepoGuards beside its repos.** The derivation below assumes RepoGuards is one of the repos
        in the tree, which is true for whoever built it here and false for anyone who
-       adds this as a marketplace from elsewhere: their grove sits wherever they put
+       adds this as a marketplace from elsewhere: their RepoGuards sits wherever they put
        it, and every relative root in their registry would resolve next to it rather
        than next to their work. A product cannot ask its users to arrange their disk
        around it.
-    3. the directory above grove — still the default, and still right for the common
+    3. the directory above RepoGuards — still the default, and still right for the common
        case of cloning it beside everything else.
     """
-    env = os.environ.get("GROVE_DEV_ROOT")
+    env = (os.environ.get("REPO_GUARDS_DEV_ROOT") or os.environ.get("GROVE_DEV_ROOT"))
     if env:
         p = os.path.realpath(os.path.expanduser(env))
         return p if os.path.isdir(p) else None
@@ -104,7 +104,7 @@ def dev_base():
         # no base: resolve_root returns None, and a root that cannot be resolved is
         # reported rather than guessed at.
         return None
-    root = grove_root()
+    root = guards_root()
     return os.path.dirname(root) if root else None
 
 
@@ -125,11 +125,11 @@ def resolve_root(value):
 
 
 def registry_path():
-    """The live registry, or None. GROVE_REGISTRY still wins — the pipelines use it."""
-    env = os.environ.get("GROVE_REGISTRY")
+    """The live registry, or None. REPO_GUARDS_REGISTRY still wins — the pipelines use it."""
+    env = (os.environ.get("REPO_GUARDS_REGISTRY") or os.environ.get("GROVE_REGISTRY"))
     if env:
         return env
-    root = grove_root()
+    root = guards_root()
     return os.path.join(root, "tools", "registry.json") if root else None
 
 
@@ -208,7 +208,7 @@ def has_local_skills(root):
 def keys_root(reg=None):
     """Where credentials live — NEVER inside a repo. An anchor, nothing more.
 
-    Grove itself has no secrets and no opinion about them. This exists because a skill
+    RepoGuards itself has no secrets and no opinion about them. This exists because a skill
     that needs one — in this marketplace or in any other layered on top — must be able
     to write `$KEYS_ROOT/<whatever>` without knowing what this machine called its
     secrets folder, or whether it has one at all. Named in the registry (`keys_root`,
@@ -276,7 +276,11 @@ def anchors(reg=None):
                 reg = json.load(f)
         except Exception:
             reg = {}
-    out = {"DEV_ROOT": dev_base(), "GROVE": grove_root(),
+    root = guards_root()
+    # GROVE is the name this anchor had before the rename to RepoGuards (0.2.0). It is
+    # still written, so a skill or a marketplace that says $GROVE keeps working for one
+    # more release; new text says $REPO_GUARDS.
+    out = {"DEV_ROOT": dev_base(), "REPO_GUARDS": root, "GROVE": root,
            "KEYS_ROOT": keys_root(reg)}
     site = site_root(reg)
     if site:
@@ -356,7 +360,7 @@ def ownership_gaps(root):
                          "its paths can be written from anywhere, silently"))
     for o in sorted(claimed - set(skills)):
         gaps.append(("a claim naming a skill that is not here", o,
-                     "either the skill moved to grove and the claim is stale, "
+                     "either the skill moved to RepoGuards and the claim is stale, "
                      "or it was deleted and nothing authors that path any more"))
     return gaps
 

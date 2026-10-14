@@ -1,12 +1,15 @@
 *English · [עברית](README.he.md)*
 
-# Grove (Cross-Repo Guards)
+# RepoGuards
+
+*Formerly Grove. Renamed in 0.2.0 — see [Upgrading from Grove](#upgrading-from-grove).*
+
 **The safety and orchestration layer for AI agents in multi-repo environments.**
 
 An AI agent (like Claude Code) is a brilliant tool when operating within a single project folder (Repository). However, in the real world, tasks cross boundaries: shipping a feature requires a code change (App), a data schema update (Hub), and editing a marketing page (Web).
 The moment the agent "reaches out" to a foreign directory, it loses touch with reality. Because the `git status` command is limited to its current working directory, the agent might blindly overwrite another developer's open files, push code to the wrong branch, or perform a destructive blind commit.
 
-**Grove was built to solve exactly this.** It is a set of guardrails that run inside the session, at the moment of the tool call: they detect the anomaly, refuse the two actions that cannot be undone, and hand the agent back the picture it was missing so it can correct itself.
+**RepoGuards was built to solve exactly this.** It is a set of guardrails that run inside the session, at the moment of the tool call: they detect the anomaly, refuse the two actions that cannot be undone, and hand the agent back the picture it was missing so it can correct itself.
 
 > **Built for Claude Code, and tested only there.** The guards are Claude Code hooks:
 > they read its hook protocol and its tool names (`Bash`, `Edit`, `Write`), and
@@ -15,7 +18,7 @@ The moment the agent "reaches out" to a foreign directory, it loses touch with r
 
 ---
 
-## The Components: What does Grove do?
+## The Components: What does RepoGuards do?
 
 The system provides 3 critical solutions:
 
@@ -25,7 +28,7 @@ The system provides 3 critical solutions:
 
 ### 2. Smart Contextual Committing (`close.py`)
 An agent updating 3 projects simultaneously leaves a trail of changes. Standard Git commands break down here.
-The script `$GROVE/tools/close.py --commit` reads which files **this specific session** wrote across every directory, and stages only those — never a sweep. What it claims is deliberately narrow: a path counts only if a writing tool of this session named it and it is still dirty, so a parallel session's work can never be swept into your commit. The cost of that choice is stated plainly under *Known limits*.
+The script `$REPO_GUARDS/tools/close.py --commit` reads which files **this specific session** wrote across every directory, and stages only those — never a sweep. What it claims is deliberately narrow: a path counts only if a writing tool of this session named it and it is still dirty, so a parallel session's work can never be swept into your commit. The cost of that choice is stated plainly under *Known limits*.
 
 ### 3. The Central Registry (`registry.json`)
 The brain that tracks which projects exist on your machine, and which "Skill Tracks" each project is allowed to load. This prevents an agent in an iOS app from loading Android deployment commands. (The system syncs perfectly with other skill libraries, such as the [App Factory](https://github.com/yybd/app-factory)).
@@ -34,26 +37,29 @@ The brain that tracks which projects exist on your machine, and which "Skill Tra
 
 ## Installation
 
-Because Grove manages your environment, it is usually **the first product you install**, sitting alongside your other projects (typically under a `<base>` directory like `~/Developer`).
+Because RepoGuards manages your environment, it is usually **the first product you install**, sitting alongside your other projects (typically under a `<base>` directory like `~/Developer`).
 
 ```bash
-git clone https://github.com/yybd/cross-repo-guards.git <base>/cross-repo-guards
-claude plugin marketplace add <base>/cross-repo-guards
-python3 <base>/cross-repo-guards/tools/deploy.py
+cd <base>
+git clone https://github.com/yybd/repo-guards.git
+claude plugin marketplace add "$PWD/repo-guards"
+python3 repo-guards/tools/deploy.py
 ```
+
+**Give `marketplace add` an absolute path** — that is what `"$PWD/…"` is for. A bare `repo-guards` or `dev/repo-guards` is read as a GitHub `owner/repo`, fails with an "access rights" error, and every step after it fails with it.
 
 `deploy.py` is the whole installation: it creates your `tools/registry.json` from the shipped template, installs the plugin, and verifies. It prints what it did — read that rather than assuming. **Then open a new session**, because hooks and skills are read at session start.
 
 **Optional, and reported by every deploy until you do it or decide not to** — the working rules, loaded in every session in every repo:
 
 ```bash
-ln -s "<base>/cross-repo-guards/rules/global-CLAUDE.md" ~/.claude/CLAUDE.md
+ln -s "<base>/repo-guards/rules/global-CLAUDE.md" ~/.claude/CLAUDE.md
 ```
 
 If you already have a `~/.claude/CLAUDE.md` — or want rules of your own on top of these, such as the language you are answered in — do not replace it. Keep it, and add one line to it that imports the rules instead:
 
 ```
-@<base>/cross-repo-guards/rules/global-CLAUDE.md
+@<base>/repo-guards/rules/global-CLAUDE.md
 ```
 
 The shared rules stay shared, your additions stay yours, and deploy accepts either shape. Nothing else depends on this step.
@@ -61,23 +67,39 @@ The shared rules stay shared, your additions stay yours, and deploy accepts eith
 ### Connecting a New Project
 For the guardrails and skills to activate in a specific project (e.g., your frontend repo), enter the project and run:
 ```bash
-/grove:register-project
+/repo-guards:register-project
 ```
-This command reads the project, writes its entry in Grove's `registry.json`, and generates a local `.claude/settings.json` in the project itself.
+This command reads the project, writes its entry in RepoGuards' `registry.json`, and generates a local `.claude/settings.json` in the project itself.
 
 **What registration does and does not change.** The guards are always on — they ship with the plugin, which is enabled for your user, so they run in every repo whether or not it is registered. Registration decides two other things: **which skill tracks load there**, and whether the end-of-turn guard **reports work you left uncommitted** in it. So an unregistered repo is not protected-by-being-ignored; it is a repo that quietly loads no tracks.
 
-That is why an unregistered repo says so, once per session. **It asks three times and then stops interrupting** — after that it is a single line, still said every session, because the thing it reports does not go away on its own. Two answers end it: register the repo, or list it under `ignored`. On a machine full of repos that are nobody's business, `GROVE_OFFER=off` in the environment, or `"offer_registration": false` in the registry, ends it everywhere.
+That is why an unregistered repo says so, once per session. **It asks three times and then stops interrupting** — after that it is a single line, still said every session, because the thing it reports does not go away on its own. Two answers end it: register the repo, or list it under `ignored`. On a machine full of repos that are nobody's business, `REPO_GUARDS_OFFER=off` in the environment, or `"offer_registration": false` in the registry, ends it everywhere.
 
 ---
 
 ## Ground Rules for AI Agents (Cross-Repo)
 
-While working on a project in parallel with others, these are the rules Grove enforces:
+While working on a project in parallel with others, these are the rules RepoGuards enforces:
 1. **Read the Injected Intelligence:** The moment you touch a foreign directory, the system injects a `[foreign]` message containing the remote status (including the Branch name). The agent must read this before continuing its edits.
 2. **Never `push` remotely:** Commands like `git -C ../other-repo push` are completely blocked. Push publishes an entire branch, which is too aggressive when executed "through the wall."
 3. **Do not collect garbage:** Never run `add .` on a foreign directory. Work surgically with exact paths, or let `close.py` do the heavy lifting for you.
-4. **Turn Completion Report:** At the end of any prompt where the agent left foreign files open without committing them, Grove's Stop Guard will surface a warning to the screen: "You left a mess elsewhere."
+4. **Turn Completion Report:** At the end of any prompt where the agent left foreign files open without committing them, RepoGuards' Stop Guard will surface a warning to the screen: "You left a mess elsewhere."
+
+---
+
+## Upgrading from Grove
+
+Up to 0.1.0 this was called Grove. The marketplace, the plugin and the commands are renamed, so an installed `grove@grove` is not upgraded in place — it is replaced:
+
+```bash
+git -C <your clone> pull
+claude plugin marketplace remove grove
+claude plugin marketplace add "<your clone, absolute>"
+python3 <your clone>/tools/deploy.py
+claude plugin uninstall grove@grove      # only after deploy reports repo-guards installed
+```
+
+`/grove:deploy` is now `/repo-guards:deploy`, and `$GROVE` is now `$REPO_GUARDS`. For one release the old names keep working: deploy still writes `$GROVE`, every `GROVE_*` variable is still read, and `grove_repo` can still be imported. The old GitHub URL redirects. Your clone's directory name does not matter.
 
 ---
 
@@ -97,7 +119,7 @@ A guard that pretends to full coverage is worse than one whose edge is known. Th
 Want to know how the Hooks intercept commands or how the Plugin Cache works?
 Read the full documentation:
 * **[How It Works (HOW-IT-WORKS.md)](HOW-IT-WORKS.md)** — Under the hood: Cache, Hooks, and Registry loading mechanics.
-* **[CLAUDE.md](CLAUDE.md)** — The constitution and guidelines the agent reads when operating inside this specific Repo (for developing Grove itself).
+* **[CLAUDE.md](CLAUDE.md)** — The constitution and guidelines the agent reads when operating inside this specific Repo (for developing RepoGuards itself).
 * **[Docs & Reasoning (docs/)](docs/)** — Every architectural decision (what was measured, why alternative solutions were rejected) is logged there.
 
 ---

@@ -4,9 +4,9 @@
 
 **Status:** applied. The criterion stands; one debt is open (see *What is left*).
 
-> **Where the numbers come from.** Grove ships two skills of its own. Everything measured
+> **Where the numbers come from.** RepoGuards ships two skills of its own. Everything measured
 > below was measured on **the app factory** — the marketplace of app-shipping tracks that
-> stands on grove — because that is where a library large enough to have a placement
+> stands on RepoGuards — because that is where a library large enough to have a placement
 > problem actually exists. The rule is enforced here; the evidence was taken there.
 
 ## The question
@@ -76,7 +76,7 @@ of its activation are two questions**, and only the first was asked here.
 
 Two concrete things, not theory:
 
-1. **The evidence that arrived by itself.** Grove's dashboard was built in a
+1. **The evidence that arrived by itself.** RepoGuards' dashboard was built in a
    session here **with none of the three design skills loaded**, because they were locked
    inside the site repo. A generic skill parked inside one project is exactly the skill
    that is missing everywhere else it is relevant.

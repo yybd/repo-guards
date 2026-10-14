@@ -6,7 +6,7 @@ This document is the mechanics: how a hook or a skill gets from the file you edi
 the session that runs it, and why a change you just saved has not taken effect yet.
 
 > **Navigation.** This document is the *how*. **[`README.md`](README.md)** is the *what*,
-> and **[`CLAUDE.md`](CLAUDE.md)** carries the working rules for developing Grove itself.
+> and **[`CLAUDE.md`](CLAUDE.md)** carries the working rules for developing RepoGuards itself.
 
 ---
 
@@ -15,7 +15,7 @@ the session that runs it, and why a change you just saved has not taken effect y
 Every change travels the same road, and there are three stations on it:
 
 ```text
-1. the source        ← $GROVE, the repo you edit
+1. the source        ← $REPO_GUARDS, the repo you edit
 2. the copy          ← ~/.claude/plugins/cache/, where Claude Code runs the code from
 3. the session       ← what is loaded in memory, read once at session start
 ```
@@ -29,9 +29,9 @@ update the copy, and an updated copy does not reach a session that is already ru
 
 **What it is.** One text file, `SKILL.md`, under `plugins/<plugin>/skills/<name>/`.
 
-**How it reaches the copy.** `claude plugin install grove@grove` **copies** the subtree
-the marketplace manifest points at into `~/.claude/plugins/cache/grove/grove/<sha>/`. The
-directory name is grove's commit at the moment of installation, and since `plugin.json`
+**How it reaches the copy.** `claude plugin install repo-guards@repo-guards` **copies** the subtree
+the marketplace manifest points at into `~/.claude/plugins/cache/repo-guards/repo-guards/<sha>/`. The
+directory name is RepoGuards' commit at the moment of installation, and since `plugin.json`
 declares no version, that commit *is* the version.
 
 **How it reaches a session.** At session start, and only then. What enters the context is
@@ -43,7 +43,7 @@ invoked. So a library of skills costs descriptions per session, not documents.
 ## Hooks
 
 **What it is.** A skill is text for the model; a hook is a program the harness runs.
-[`plugins/grove/hooks/hooks.json`](plugins/grove/hooks/hooks.json) registers each guard
+[`plugins/repo-guards/hooks/hooks.json`](plugins/repo-guards/hooks/hooks.json) registers each guard
 against an **event** and, where the event has one, a **tool matcher**. Claude Code starts
 it as its own process and hands it the event payload as JSON on stdin.
 
@@ -84,14 +84,14 @@ guard.
 
 ### How you find out the copy has gone stale
 
-[`warn_stale_plugin_cache.py`](plugins/grove/hooks/scripts/warn_stale_plugin_cache.py), a
+[`warn_stale_plugin_cache.py`](plugins/repo-guards/hooks/scripts/warn_stale_plugin_cache.py), a
 `Stop` hook. It **hashes every file on both sides and compares the bytes** — not the SHAs,
 for the reason above — and names both what differs and the exact command that repairs
 *that* case. It reports and never installs: a hook that silently changed installation
 state would be a deployment nobody asked for.
 
 It speaks only when the set of findings **changes**, so an unfixed gap does not shout
-every turn, and it speaks in grove's own directory, because that is where the gap is made.
+every turn, and it speaks in RepoGuards' own directory, because that is where the gap is made.
 
 A session that is already running is locked to the copy it started with, and nothing can
 change that from inside it.
@@ -107,20 +107,20 @@ and which tracks each one loads. It is **machine data**: the repo ships
 **And it does not travel inside the plugin.** It changes every time a repo is registered,
 so a copy pinned to the last installed commit would answer yesterday's question. The code
 moves into the plugin and the data stays in the repo;
-[`grove_repo.py`](plugins/grove/hooks/scripts/grove_repo.py) is the bridge that finds the
+[`guards_repo.py`](plugins/repo-guards/hooks/scripts/guards_repo.py) is the bridge that finds the
 live file from a guard running out of the cache.
 
 What it holds:
 
 1. **where each project is** — written relative to the tree's base, so the same registry
    works on another machine;
-2. **which tracks each one loads** — including tracks from other marketplaces, which grove
+2. **which tracks each one loads** — including tracks from other marketplaces, which RepoGuards
    reports and deliberately does not write;
-3. **the anchors** — every entry's name becomes an environment variable (`$GROVE`, and one
+3. **the anchors** — every entry's name becomes an environment variable (`$REPO_GUARDS`, and one
    per repo), written into `~/.claude/settings.json` by every deploy. That is why a skill
    names `$SITE/content` and never a path belonging to one machine.
 
-`/grove:register-project` is what writes an entry, from inside the repo being registered.
+`/repo-guards:register-project` is what writes an entry, from inside the repo being registered.
 
 ---
 

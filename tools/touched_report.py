@@ -12,12 +12,12 @@ remember what to query — which is the failure this whole line of work is about
 """
 import json, os, sys, collections
 
-STATE_DIR = os.environ.get("GROVE_TOUCHED_STATE") or os.path.expanduser(
-    "~/.claude/.grove/touched")
+STATE_DIR = os.environ.get("REPO_GUARDS_TOUCHED_STATE") or os.path.expanduser(
+    "~/.claude/.repo-guards/touched")
 REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "registry.json")
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                "plugins", "grove", "hooks", "scripts"))
-from grove_repo import registry_roots as all_registry_roots  # noqa: E402
+                                "plugins", "repo-guards", "hooks", "scripts"))
+from guards_repo import registry_roots as all_registry_roots  # noqa: E402
 
 
 def registry_roots():

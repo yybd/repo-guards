@@ -8,7 +8,7 @@ live machine would make the verdict depend on which repo happens to declare toda
 Three groups: what the declaration blocks, what it deliberately does not, and every
 malformed input, each of which must ALLOW.
 
-    python3 plugins/grove/hooks/scripts/tests/test_honor_ownership.py
+    python3 plugins/repo-guards/hooks/scripts/tests/test_honor_ownership.py
 """
 import json, os, shutil, subprocess, sys, tempfile
 
@@ -23,7 +23,7 @@ def write(path, text=""):
 
 
 def main():
-    base = os.path.realpath(tempfile.mkdtemp(prefix="grove-owns-test-"))
+    base = os.path.realpath(tempfile.mkdtemp(prefix="repo-guards-owns-test-"))
     fails = 0
 
     def check(ok, got, exp, label, detail=""):
@@ -160,7 +160,7 @@ def main():
             ("allow", "sed without -i writes nothing",  f"sed -n -e s/a/b/p {site}/src/data/apps.ts", outside),
             ("allow", "a flag bundle on a command that never writes in place",
              f"grep -ri foo {site}/src/pages", outside),
-            ("allow", "the claim quoted inside an argument", f"echo 'rm -rf {site}/src' > /tmp/grove-note", outside),
+            ("allow", "the claim quoted inside an argument", f"echo 'rm -rf {site}/src' > /tmp/repo-guards-note", outside),
         ]
         for exp, label, cmd, cwd in MORE:
             got, detail = sh(cmd, cwd)

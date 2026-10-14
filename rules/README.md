@@ -7,7 +7,7 @@ symlink. It is the English copy; `global-CLAUDE.he.md` is the same rules in Hebr
 kept beside it for the reader rather than for the agent:
 
 ```bash
-ln -s $GROVE/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
+ln -s $REPO_GUARDS/rules/global-CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
 That one command is the whole install, and it is per machine.
@@ -15,7 +15,7 @@ That one command is the whole install, and it is per machine.
 **Rules of your own go beside these, not into them.** This file is shared — whoever links it gets every line in it — so a preference that is yours alone (the language you are answered in, a house style) does not belong here. Make `~/.claude/CLAUDE.md` a file of your own instead, and import these from it:
 
 ```
-@$GROVE/rules/global-CLAUDE.md   ← written as the expanded path; @ does not expand variables
+@$REPO_GUARDS/rules/global-CLAUDE.md   ← written as the expanded path; @ does not expand variables
 
 ## Mine
 …

@@ -1,9 +1,9 @@
 ---
 name: deploy
 description: >-
-  Put what the grove repo holds onto this machine, and answer "is everything in
+  Put what the RepoGuards repo holds onto this machine, and answer "is everything in
   place?". Use when a skill, guard, hooks.json or the registry has changed and needs
-  to take effect, when the user says "פרוס", "deploy grove", "עדכן את
+  to take effect, when the user says "פרוס", "deploy RepoGuards", "עדכן את
   התוספים", "update the plugins", "בדוק שהכול במקום", "is everything deployed", when
   a skill or guard that was just edited does not seem to be running, or when the
   stale-plugin-cache warning appears at the end of a turn. It syncs the settings
@@ -11,12 +11,12 @@ description: >-
   command per plugin, and verifies — then says plainly that a new session is needed.
 ---
 
-# Deploy grove
+# Deploy RepoGuards
 
 ## The one fact this exists for
 
 **Committing changes nothing.** Skills and guards live inside a plugin, and a plugin
-is a *copy* under `~/.claude/plugins/cache/grove/<track>/<sha>/`. Between "I
+is a *copy* under `~/.claude/plugins/cache/repo-guards/<track>/<sha>/`. Between "I
 committed it" and "it is running" sit two steps nobody performs for you — refreshing
 that copy, and opening a new session.
 
@@ -27,11 +27,11 @@ Both times it was caught by accident.
 ## Run it
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/grove.py deploy
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/repo_guards.py deploy
 ```
 
-That form works before the first deploy has ever run; `python3 $GROVE/tools/deploy.py`
-is the same command, and `$GROVE` is a variable **deploy itself writes**, so it is empty
+That form works before the first deploy has ever run; `python3 $REPO_GUARDS/tools/deploy.py`
+is the same command, and `$REPO_GUARDS` is a variable **deploy itself writes**, so it is empty
 on a machine that has not run it yet — which is exactly the machine that needs this.
 
 `--check` reports without changing anything — that is the answer to "is everything in

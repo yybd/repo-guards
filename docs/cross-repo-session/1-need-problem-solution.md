@@ -113,7 +113,7 @@ built, not of the agent:
 | **Reference** | one points at the other | a page on the site → the privacy policy URL |
 | **Orchestration** | one process whose steps live in several places | a release: metadata · build · site page, **in that order** |
 | **Reconciliation** | an action whose entire job is to compare and settle | `price-sync` compares a price across three sources and resolves them |
-| **Tooling** | one serves them all | grove supplies the skills to everything else |
+| **Tooling** | one serves them all | RepoGuards supplies the skills to everything else |
 
 **And reconciliation is the sharpest of them:** such an action **cannot** exist inside one
 place — not for convenience, but by definition.
@@ -228,7 +228,7 @@ dirty  →  committed  →  published × 8
 
 And the deploy script there decides per project **against the commit that site actually
 last submitted** — because that is the only question with an answer. The same shape
-applies to grove itself: a commit is not a deployment to
+applies to RepoGuards itself: a commit is not a deployment to
 `~/.claude/plugins/cache`, and the rule *"a commit is not a deployment"* was born from
 exactly that gap.
 
@@ -251,7 +251,7 @@ abolished.**
 | **the app's repo** | the code ships to a store. A version **freezes** at release — a website's does not |
 | `app-hub` | data, not code. Profiles, prices and media that several consumers read |
 | the site | **eight deployments sit on it, one per domain** — imposed by the platform |
-| `grove` | the tooling. It serves all the others and belongs to none of them |
+| `RepoGuards` | the tooling. It serves all the others and belongs to none of them |
 
 Different life rhythms, different publication targets, different ownership. Merging would
 not simplify — it would create a repo that releases to a store and to a website
@@ -292,10 +292,10 @@ all.** Claude Code resolves settings, skills and memory against the cwd, not aga
 git root. Measured 2026-09-09 with `claude plugin list`:
 
 ```
-<project>/              android · apple · capacitor · design · shared · grove
-<project>/apps/mobile/  grove only
-<app>/                  five tracks + grove
-<app>/Capacitor/        grove only
+<project>/              android · apple · capacitor · design · shared · RepoGuards
+<project>/apps/mobile/  RepoGuards only
+<app>/                  five tracks + RepoGuards
+<app>/Capacitor/        RepoGuards only
 ```
 
 **Same repo. Same git. One directory in — and everything is gone.**
@@ -381,7 +381,7 @@ forever, and will never load where it is needed.
 - **The transcript does not travel, and it is the only one that is not a file.** Another
   directory's `CLAUDE.md` and memory are **readable** from outside; what was weighed and
   rejected in the current session is not. Measured: 3 of 10 commits in the site repo on one
-  day rested on knowledge created in grove.
+  day rested on knowledge created in RepoGuards.
 - **Writing to another directory's memory is entirely permitted and unenforced.** The
   worst of both worlds: it cannot be written **well** from outside — without reading and
   merging — and nothing prevents writing it **badly**.
@@ -422,7 +422,7 @@ never load it, and even if that app changes completely, nobody will catch it.
 
 **2. The event and the record are in two different places** — and this is the serious one,
 because it applies even to records filed **correctly**. Whoever moved the skills was
-standing in grove; what they invalidated sat in the site's `CLAUDE.md`, in the hub's
+standing in RepoGuards; what they invalidated sat in the site's `CLAUDE.md`, in the hub's
 memory, and in a third project's memory. **Whoever caused the damage does not see it.**
 
 *And measured:* five broken references in one repo's `CLAUDE.md` were caught **only**

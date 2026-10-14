@@ -54,7 +54,7 @@ def run(env, cwd, payload=None, raw=None):
 
 
 def main():
-    base = tempfile.mkdtemp(prefix="grove-offer-test-")
+    base = tempfile.mkdtemp(prefix="repo-guards-offer-test-")
     fails = 0
 
     def check(ok, label, detail=""):
@@ -73,7 +73,7 @@ def main():
         os.makedirs(nested, exist_ok=True)
         app_nested = os.path.join(known_app, "fastlane")
         os.makedirs(app_nested, exist_ok=True)
-        # a registered root that loads nothing anyway — grove's own case
+        # a registered root that loads nothing anyway — RepoGuards' own case
         trackless = git_repo(os.path.join(base, "trackless"))
         trackless_sub = os.path.join(trackless, "plugins")
         os.makedirs(trackless_sub, exist_ok=True)
@@ -100,8 +100,8 @@ def main():
 
         def env(state="state", reg=None):
             e = dict(os.environ)
-            e["GROVE_REGISTRY"] = reg or registry
-            e["GROVE_OFFER_STATE"] = os.path.join(base, state)
+            e["REPO_GUARDS_REGISTRY"] = reg or registry
+            e["REPO_GUARDS_OFFER_STATE"] = os.path.join(base, state)
             return e
 
         # --- the silent branches: speaking here is the failure that gets it uninstalled
@@ -111,7 +111,7 @@ def main():
         # This asserted silence until 2026-09-09, and the silence was the bug: project
         # settings resolve against the cwd, so a session one directory in loads none of
         # the repo's tracks. Verified against `claude plugin list`, which resolves them
-        # the same way: a nested app directory had grove and nothing else.
+        # the same way: a nested app directory had RepoGuards and nothing else.
         msg, err = run(env("s-nested"), nested)
         check(msg != "" and "SUBDIRECTORY" in msg and known_proj in msg,
               "subdirectory of a registered project — says the tracks are not loaded",
@@ -217,12 +217,12 @@ def main():
         for n in (4, 5):
             check(seen[n - 1] != "" and "AskUserQuestion" not in seen[n - 1],
                   "session %d still speaks, and no longer interrupts" % n, seen[n - 1][:70])
-        check("GROVE_OFFER=off" in seen[4], "and it names the way to end it", seen[4][:70])
+        check("REPO_GUARDS_OFFER=off" in seen[4], "and it names the way to end it", seen[4][:70])
 
         # the two answers that end it for good
-        msg, _ = run(dict(env("s-off"), GROVE_OFFER="off"), fresh,
+        msg, _ = run(dict(env("s-off"), REPO_GUARDS_OFFER="off"), fresh,
                      payload={"cwd": fresh, "session_id": "sess-off"})
-        check(msg == "", "GROVE_OFFER=off silences it entirely", msg[:70])
+        check(msg == "", "REPO_GUARDS_OFFER=off silences it entirely", msg[:70])
 
         reg_off = os.path.join(base, "registry-off.json")
         json.dump({"projects": {}, "offer_registration": False}, open(reg_off, "w"))

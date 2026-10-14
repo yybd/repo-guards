@@ -9,7 +9,7 @@ The reason that rule is broken is stated in the rule itself: a change left in a 
 you are not standing in "is not visible in any `git status` you look at, and so it is
 forgotten". Your own cwd you see; every other repo is a blind spot. This closes it.
 
-It is also the IGNITION for $GROVE/tools/close.py: nothing makes a session run that
+It is also the IGNITION for $REPO_GUARDS/tools/close.py: nothing makes a session run that
 command, and an engine without ignition is no different from no engine. This is the
 one place a session cannot route around — it does not choose not to end a turn.
 
@@ -28,16 +28,16 @@ Fails silent: any error reports nothing. A hook that crashes at the end of every
 is worse than no hook.
 """
 import json, os, subprocess, sys, time
-# The guard ships inside grove and runs from the plugin cache, where
-# nothing sits two directories above it. grove_repo finds the live repo.
-from grove_repo import registry_path, registry_roots
+# The guard ships inside RepoGuards and runs from the plugin cache, where
+# nothing sits two directories above it. guards_repo finds the live repo.
+from guards_repo import registry_path, registry_roots
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Both are overridable so the pipeline can exercise this against throwaway repos.
 # Testing it against the real registry would mean dirtying a real project to see
 # it fire, which is the one thing this hook exists to complain about.
 REGISTRY = registry_path()
-STATE_DIR = os.environ.get("GROVE_STOP_STATE") or os.path.expanduser("~/.claude/.grove/stop-state")
+STATE_DIR = os.environ.get("REPO_GUARDS_STOP_STATE") or os.path.expanduser("~/.claude/.repo-guards/stop-state")
 
 
 def real(p):
@@ -164,7 +164,7 @@ def main():
     # Registered at user scope, so this runs in every project on the machine — 69 of
     # them against a registry of 11. That is right for NEW changes: a session anywhere
     # may dirty a registry repo, and catching that is the whole point. It is wrong for
-    # the pre-existing report, which is context about grove's own repos and is
+    # the pre-existing report, which is context about RepoGuards' own repos and is
     # pure noise in a project that has nothing to do with them. So that half speaks
     # only when the session actually stands inside the registry's world.
     inside = bool(cwd) and any(cwd == r or cwd.startswith(r + os.sep) for _, r in rs)
@@ -201,7 +201,7 @@ def main():
         return
 
     head = ("Work left open outside this session's own `git status`:\n")
-    tail = ("\n\n  python3 $GROVE/tools/close.py      ← what changed where, and what is still open\n\n"
+    tail = ("\n\n  python3 $REPO_GUARDS/tools/close.py      ← what changed where, and what is still open\n\n"
             "That is the report; this is only the reminder. It stages just the paths this "
             "session wrote, commits per place, and prints the push radius rather than pushing.")
     print(json.dumps({"systemMessage": head + "\n".join(lines) + tail}))

@@ -2,7 +2,7 @@
 
 # tools/ — the control plane
 
-Not skills. These are the parts of grove that a person runs: the registry of where every
+Not skills. These are the parts of RepoGuards that a person runs: the registry of where every
 project lives, the deployment that makes an edit real, and the commands that keep the
 records honest.
 
@@ -23,10 +23,10 @@ records honest.
 | `check_bilingual.py` | the two language copies of a document, and whether they have drifted |
 | `touched_report.py` | reads the journal: does a session really touch more than one repo, and does it reach beyond the registry |
 
-**How a skill reaches them.** `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/grove.py <tool> …`
+**How a skill reaches them.** `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/repo_guards.py <tool> …`
 — the plugin knows where it is installed, and that shim knows how to get from there to
-this repo. The equivalent `python3 $GROVE/tools/<tool>.py` is the same command *once
-`$GROVE` exists*, and `$GROVE` is written by the first deploy — so the skill whose job is
+this repo. The equivalent `python3 $REPO_GUARDS/tools/<tool>.py` is the same command *once
+`$REPO_GUARDS` exists*, and `$REPO_GUARDS` is written by the first deploy — so the skill whose job is
 to run that first deploy could not name it. The tools stay here rather than being copied
 into the plugin, for the reason the registry already forced: a plugin is a copy pinned to
 a commit, and a tool shipped inside it would be yesterday's tool operating on today's
@@ -79,7 +79,7 @@ and why the drift checks below exist.
 
 ## registry.json
 
-**Three things here are grove's, and the rest is somebody else's.** It reads `projects`
+**Three things here are RepoGuards', and the rest is somebody else's.** It reads `projects`
 (where each repo is, and which tracks it loads), `ignored` (repos deliberately left off,
 so the offer stops returning) and `keys_root` — an anchor, because a skill that needs
 credentials must be able to name a folder this machine has without knowing what it is
@@ -96,13 +96,13 @@ what every anchor variable means on this machine. It is machine data: the repo s
 only in which key names the path (`root` / `repo`), and three guards once read `projects`
 alone — so the app repos, the ones a release session is likeliest to write into from
 elsewhere, sat outside every boundary. They all go through
-`grove_repo.registry_roots()` now, so the two lists cannot drift apart again.
+`guards_repo.registry_roots()` now, so the two lists cannot drift apart again.
 
 ## The guards — seven, and they arrive with the plugin
 
-They ship inside `grove`. `plugins/grove/hooks/hooks.json` registers them, so installing
+They ship inside `RepoGuards`. `plugins/repo-guards/hooks/hooks.json` registers them, so installing
 that plugin is what puts them on a machine: there is no install step of ours and no entry
-in `~/.claude/settings.json`. Grove is the always-on plugin, which is exactly the scope
+in `~/.claude/settings.json`. RepoGuards is the always-on plugin, which is exactly the scope
 these need — a guard protecting one repo from another repo's session has to load in that
 other session.
 
@@ -128,7 +128,7 @@ the screen.
 
 **The registry does not travel with them.** It is live data, rewritten every time a repo is
 registered, so a copy pinned to the last installed commit would answer yesterday's
-question. `grove_repo.py` bridges the two: `GROVE_ROOT`, then walking up from the file,
+question. `guards_repo.py` bridges the two: `REPO_GUARDS_ROOT`, then walking up from the file,
 then the marketplace's own `installLocation`, which is what answers from inside the cache.
 
 ### What the guards cannot see
@@ -157,7 +157,7 @@ and reports registrations left over from the hand-registration era (`--clean` re
 exactly those). Any pipeline can also be run on its own:
 
 ```bash
-python3 plugins/grove/hooks/scripts/tests/test_scope_foreign_commits.py
+python3 plugins/repo-guards/hooks/scripts/tests/test_scope_foreign_commits.py
 ```
 
 Or exercise a guard by hand — output means denied, and the JSON carries the reason; no
@@ -165,7 +165,7 @@ output means allowed:
 
 ```bash
 echo '{"cwd":"/some/other/place","tool_input":{"file_path":"<a path some place declared it owns>"}}' \
-  | python3 plugins/grove/hooks/scripts/honor_ownership.py
+  | python3 plugins/repo-guards/hooks/scripts/honor_ownership.py
 ```
 
 Why each guard exists, and what was rejected on the way — [`docs/cross-repo-session/`](../docs/cross-repo-session).

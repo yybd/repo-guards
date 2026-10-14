@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pipeline for the one thing both guards stand on: reading a shell line.
 
-    python3 plugins/grove/hooks/scripts/tests/test_shell_commands.py
+    python3 plugins/repo-guards/hooks/scripts/tests/test_shell_commands.py
 
 `honor_ownership` asks what a line writes and `scope_foreign_commits` asks which repo it
 acts on, and both first need the same answer: WHICH COMMANDS ARE IN THIS LINE, AND WHERE
@@ -20,7 +20,7 @@ Everything runs in memory. No files, no repos, no machine.
 import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from grove_repo import shell_commands                       # noqa: E402
+from guards_repo import shell_commands                       # noqa: E402
 
 HERE = "/base/home"
 THERE = "/base/other"
