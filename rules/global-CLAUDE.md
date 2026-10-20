@@ -29,6 +29,33 @@ ones another session or another person made, and none of it can be taken back.
 push. Whether a push deploys anything is a fact about that project — check it there,
 and say "pushed", not "live", until you have.
 
+## GitHub Actions — the account pays for every minute
+
+**A private repo's Actions draw on one allowance for the whole account** — on the free
+plan 2,000 minutes a month and 500 MB of artifact storage — and **a Windows minute counts
+twice, a macOS minute ten times.** When it runs out, every workflow in every private repo
+stops until the month turns or someone pays. It happened on 2026-10-20: about 2,450
+minutes in twenty days and 2 GB of artifacts, most of it from two workflows that ran
+Windows and macOS on every push. A public repo pays for none of this.
+
+**When writing or changing a workflow:**
+- **Windows and macOS never run on every push** — by hand (`workflow_dispatch`), on a
+  version tag, or on a pull request. A push runs on Linux; choose the runner by
+  `github.event_name` when one workflow does both.
+- **Every workflow has `concurrency` with `cancel-in-progress: true`**, and every job a
+  `timeout-minutes` — a newer push cancels the run before it, and a hung job stops.
+- **Every `upload-artifact` sets `retention-days` of 7 or less.** Installers and anything a
+  user downloads go to a Release, not to an artifact — the default keeps it 90 days.
+- **A push that changes documents only runs nothing** (`paths-ignore`).
+
+**When a build is heavy and the allowance is short, build locally** (as the Bitstrom
+image was, with `docker buildx`) rather than starting the workflow again and again.
+
+**A deliberate exception is written in the workflow itself**, where its next reader sees
+the reason: `# repo-guards: actions-budget ok — <why>` (a public repo, for example).
+`python3 $REPO_GUARDS/tools/check_actions.py` checks every registered repo against this,
+and runs inside every deploy.
+
 ## Working across projects
 
 **File access crosses directories; loading does not.** An absolute path reaches any
