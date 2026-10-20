@@ -6,6 +6,8 @@
 
 **The safety and orchestration layer for AI agents in multi-repo environments.**
 
+*The story behind it — the push that published 18 commits nobody chose, what didn't work, and how it works now: [the article](https://www.bdtech.app/blog/cross-repo-guards?utm_source=github).*
+
 ![The agent stands in my-app and reaches into app-hub: RepoGuards refuses the push and the sweeping add, shows the three commits the push would have published, and allows an exact-path add with the other repo's state attached. Real hook output on two throwaway repos.](docs/media/repoguards-demo.gif)
 
 An AI agent (like Claude Code) is a brilliant tool when operating within a single project folder (Repository). However, in the real world, tasks cross boundaries: shipping a feature requires a code change (App), a data schema update (Hub), and editing a marketing page (Web).
