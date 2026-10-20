@@ -13,8 +13,6 @@
 # only dependency, so there is nothing to install and no excuse for not checking.
 name: check
 
-# repo-guards: actions-budget ok — a public repository: Actions minutes cost it nothing, and
-# the macOS leg is the point (see above).
 on:
   push:
     branches: [main]

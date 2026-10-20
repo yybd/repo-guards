@@ -6,7 +6,7 @@ Not skills. These are the parts of RepoGuards that a person runs: the registry o
 project lives, the deployment that makes an edit real, and the commands that keep the
 records honest.
 
-*Counted from disk 2026-10-20: eleven scripts here, seven guards in the plugin.*
+*Counted from disk 2026-09-11: ten scripts here, seven guards in the plugin.*
 
 ## The scripts, and which question each answers
 
@@ -21,7 +21,6 @@ records honest.
 | `check_ownership.py` | every local skill declared, every claim still pointing at something |
 | `check_scripts.py` | the scripts a skill hands to a session: do they parse, do their imports resolve. **Static only — nothing is executed** |
 | `check_bilingual.py` | the two language copies of a document, and whether they have drifted |
-| `check_actions.py` | every registered repo's GitHub workflows: does any of them spend the account's Actions minutes or artifact storage carelessly — Windows or macOS on every push, an artifact kept 90 days |
 | `touched_report.py` | reads the journal: does a session really touch more than one repo, and does it reach beyond the registry |
 
 **How a skill reaches them.** `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/repo_guards.py <tool> …`

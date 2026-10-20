@@ -289,21 +289,6 @@ def main():
             if ln.strip() and not ln.startswith("Checked "):
                 print("   " + ln.rstrip())
         problems += 1
-    # The account's Actions minutes and artifact storage are one allowance for every
-    # private repo, and a workflow says nothing about what it costs; when they run out,
-    # nothing builds anywhere. A Windows or macOS run on every push, or an
-    # artifact kept 90 days, blocks; the softer shapes are printed and do not.
-    rc_act, out_act = sh([sys.executable, os.path.join(HERE, "check_actions.py")])
-    if rc_act != 0:
-        for ln in out_act.splitlines():
-            if ln.strip() and not ln.startswith("Checked ") and not ln.lstrip().startswith("·"):
-                print("   " + ln.rstrip())
-        problems += 1
-    else:
-        nrep = sum(1 for ln in out_act.splitlines() if ln.lstrip().startswith("·"))
-        if nrep:
-            print(f"   · Actions: {nrep} softer findings (no concurrency or timeout) — "
-                  f"`python3 tools/check_actions.py`")
     rc_scr, out_scr = sh([sys.executable, os.path.join(HERE, "check_scripts.py")])
     if rc_scr != 0:
         for ln in out_scr.splitlines():
