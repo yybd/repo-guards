@@ -3,9 +3,9 @@
     python3 tools/tests/test_check_actions.py
 
 Each case is a workflow written to a throwaway file, and asserts the exact number of
-failures and reports — not merely that something was said. The cases are the shapes
-found on 2026-10-20, when the account's Actions minutes ran out, and the fixed shape of
-each: a checker has to stay quiet on the fix as surely as it speaks on the fault.
+failures and reports — not merely that something was said. The cases are the shapes that
+use up an account's Actions minutes, and the fixed shape of each: a checker has to stay
+quiet on the fix as surely as it speaks on the fault.
 """
 import os, sys, tempfile
 

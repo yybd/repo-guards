@@ -290,8 +290,8 @@ def main():
                 print("   " + ln.rstrip())
         problems += 1
     # The account's Actions minutes and artifact storage are one allowance for every
-    # private repo, and a workflow says nothing about what it costs: on 2026-10-20 they
-    # ran out, and nothing built anywhere. A Windows or macOS run on every push, or an
+    # private repo, and a workflow says nothing about what it costs; when they run out,
+    # nothing builds anywhere. A Windows or macOS run on every push, or an
     # artifact kept 90 days, blocks; the softer shapes are printed and do not.
     rc_act, out_act = sh([sys.executable, os.path.join(HERE, "check_actions.py")])
     if rc_act != 0:

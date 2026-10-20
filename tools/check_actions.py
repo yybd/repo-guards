@@ -7,10 +7,8 @@ A private repository pays for Actions out of one allowance for the whole account
 the free plan 2,000 minutes a month and 500 MB of artifact storage — and **a Windows
 minute counts twice, a macOS minute ten times.** Run out, and every workflow in every
 private repo stops: nothing builds, nothing is checked, until the month turns or someone
-pays. Measured on 2026-10-20, the day it happened here: about 2,450 billed minutes in
-twenty days, and 2 GB of artifacts. Half of the minutes came from two shapes — a test
-matrix that ran macOS and Windows on every push (851), and a Windows build on every push
-(612) — and most of the storage from installers kept for the default 90 days.
+pays. The two shapes that get there fastest are a test matrix that runs macOS and Windows
+on every push, and installers uploaded as artifacts and kept for the default 90 days.
 
 Nothing in a workflow file says what it costs, and a workflow is written once and then
 runs for months. So the shapes that cost are checked here, statically, across every place
