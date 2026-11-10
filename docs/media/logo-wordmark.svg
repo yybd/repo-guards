@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 716 128" role="img" aria-labelledby="t">
+  <title id="t">RepoGuards</title>
+  <style>
+    .w { fill: #0d1117; font: 800 96px Inter, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif; letter-spacing: -3.5px; }
+    @media (prefers-color-scheme: dark) { .w { fill: #e6edf3; } }
+  </style>
+  <defs>
+    <clipPath id="here"><rect x="0" y="0" width="64" height="128"/></clipPath>
+    <mask id="cut">
+      <rect width="128" height="128" fill="#fff"/>
+      <circle cx="43" cy="62" r="9" fill="#000"/>
+      <rect x="43" y="58.5" width="21" height="7" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#cut)">
+    <path clip-path="url(#here)" fill="#f0883e"
+          d="M64 12 106 28V64C106 90 88 108 64 116 40 108 22 90 22 64V28Z"/>
+  </g>
+  <path fill="none" stroke="#f0883e" stroke-width="8" stroke-linejoin="round"
+        d="M64 12 106 28V64C106 90 88 108 64 116 40 108 22 90 22 64V28Z"/>
+  <circle cx="85" cy="62" r="7" fill="none" stroke="#f0883e" stroke-width="6"/>
+  <text class="w" x="136" y="98">RepoGuards</text>
+</svg>

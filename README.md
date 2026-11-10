@@ -1,5 +1,7 @@
 *English · [עברית](README.he.md)*
 
+<img src="docs/media/logo.svg" width="96" alt="RepoGuards logo">
+
 # RepoGuards
 
 *Formerly Grove. Renamed in 0.2.0 — see [Upgrading from Grove](#upgrading-from-grove).*

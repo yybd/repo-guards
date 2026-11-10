@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t">
+  <title id="t">RepoGuards</title>
+  <!-- A shield split down the middle: the solid half is the repo the session stands in,
+       the outlined half is the foreign one. The commit on the solid side reaches the
+       line between them and stops there. -->
+  <defs>
+    <clipPath id="here"><rect x="0" y="0" width="64" height="128"/></clipPath>
+    <mask id="cut">
+      <rect width="128" height="128" fill="#fff"/>
+      <circle cx="43" cy="62" r="9" fill="#000"/>
+      <rect x="43" y="58.5" width="21" height="7" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#cut)">
+    <path clip-path="url(#here)" fill="#f0883e"
+          d="M64 12 106 28V64C106 90 88 108 64 116 40 108 22 90 22 64V28Z"/>
+  </g>
+  <path fill="none" stroke="#f0883e" stroke-width="8" stroke-linejoin="round"
+        d="M64 12 106 28V64C106 90 88 108 64 116 40 108 22 90 22 64V28Z"/>
+  <circle cx="85" cy="62" r="7" fill="none" stroke="#f0883e" stroke-width="6"/>
+</svg>

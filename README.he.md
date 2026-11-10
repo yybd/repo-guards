@@ -1,5 +1,7 @@
 *[English](README.md) · עברית*
 
+<img src="docs/media/logo.svg" width="96" alt="הלוגו של RepoGuards">
+
 # RepoGuards
 
 *לשעבר Grove. השם שונה בגרסה 0.2.0. ראה [שדרוג מ-Grove](#שדרוג-מ-grove).*
